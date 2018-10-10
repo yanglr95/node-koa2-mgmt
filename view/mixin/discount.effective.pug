@@ -1,0 +1,12 @@
+mixin DiscountEffective(date, expiretime)
+  - var _date = date
+  if !_date
+    | #{UIHelper.formatdate('YYYY-MM-DD HH:mm', expiretime)}
+  else 
+    - var newdate = _date.substring(0, _date.length - 1)
+    if _date.endsWith('D')
+      | #{newdate + '天'}
+    else if _date.endsWith('Y')
+      | #{newdate + '月'}
+    else 
+      | #{newdate + '年'}

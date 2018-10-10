@@ -1,0 +1,72 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/user/' + _query.userId
+  - var _id = _.get(_query, 'userId')
+  - var _planid = _.get(_query, 'planId')
+  - var pageTitle = '计划提前退出'
+  - var pageClass = 'page-user-asset'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle} #{_planid}
+  if success
+    +Success(_baseUrl)(action=pageTitle).attached
+  else
+    form#J_user-plan-quit-form.ui.stacked.green.segment.form(method='POST')
+      h3.ui.header #{pageTitle}
+      input(type='hidden' name='_csrf' value=csrf)
+      table(class='ui striped celled table')
+        tbody
+          tr
+            td.disabled 用户名
+            td #{_entity.userName}
+            td.disabled 姓名
+            td #{_entity.realName}
+          tr
+            td.disabled 计划本金
+            td #{UIHelper.formatMoney(_entity.finalAmount)}
+            td.disabled 期限
+            td #{_entity.lockPeriod}个月
+      if !!(errors)
+        +Error(errors)
+      .field.required
+        label 手续费比例
+        .ui.right.labeled.input
+          input#J_rate(type='text' name='rate'
+            value=_query.quitRate
+            maxlength=5
+            placeholder='手续费比例' required)
+          .ui.label %
+      .field
+        label 手续费
+        .ui.right.labeled.input
+          input#J_amount(type='text' name='amount'
+            value=_query.amount
+            tabindex=-1
+            maxlength=50 readonly
+            placeholder='手续费')
+          .ui.label 元
+      .field
+        label 备注内容
+        textarea(name='remark' placeholder='备注内容最多500字' maxlength=500) #{_query.quitReason}
+      .ui.center.aligned.basic.segment
+        .ui.buttons.center.aligned
+          button(class='ui positive button' type='submit') 退出
+          .or
+          button(class='ui button' type='reset') 重置
+
+block foot-script
+  script.
+    app.handler('planQuit')({amount: #{_entity.finalAmount||0}});
+  if !!(errors)
+    script.
+      app.formError({'#J_user-plan-quit-form': !{JSON.stringify(errors)}});

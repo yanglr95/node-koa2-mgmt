@@ -1,0 +1,135 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '提现详情'
+  - var pageClass = 'page-withdraw-detail'
+  - var _query = query || {}
+  - var _entity= entity || {}
+  - var _id = _query.id
+  - var _baseUrl = '/withdraw/' + _id
+  - var _status = _.get(_entity, 'cashDrawStatus')
+  - var _type = _.get(_entity, 'drawCashType')
+  - var _isSpecial = _type == 'SPECIAL_DRAWCASH'
+  - var _canReject = _status == 'NEW_APPLY' || _status == 'CHECK_ERROR' || _status == 'WAIT_CASHDRAW'
+  - var _isReject = (action == 'reject')
+  - var _isRefund = (action == 'refund')
+  - var _isApply = (action == 'apply')
+  - var _pointCert = _.get(_entity, 'pointWorkflow.certificatePath')
+  - var _pointStatus = _.get(_entity, 'pointWorkflow.status')
+  - var _pointRemark = _.get(_entity, 'pointWorkflow.auditDesc')
+  - var _pointCreateTime = _.get(_entity, 'pointWorkflow.createTime')
+  - var _pointCreateUser = _.get(_entity, 'pointWorkflow.createUser')
+  - var _userId = _.get(entity, 'user.userId')
+  if _isApply
+    - pageTitle = '再次申请提现'
+  else if _isRefund
+    - pageTitle = '手动退票'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/withdraw') 提现管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle} ##{_id}
+  .ui.segment
+    table.ui.celled.striped.table
+      thead
+        tr
+          th(colspan='6') 提现详情 ##{_id}#{_entity.manualFlag=='Y'?'人工提现':''} : {#{UIHelper.parseWithdrawStatus(_entity.cashDrawStatus)}}
+      tbody
+        tr
+          td.disabled  用户ID
+          td: a(href='/user/'+ _userId) #{_userId}
+          td.disabled  姓名
+          td #{_.get(entity, 'bank.name')}
+          td.disabled  提现金额
+          td #{UIHelper.formatMoney(_.get(entity, 'amount'))}
+        tr
+          td.disabled 银行名称
+          td #{_.get(entity, 'bank.deposit')}
+          td.disabled 银行账号
+          td(colspan=3) #{UIHelper.safeBank(_.get(entity, 'bank.cardId'))}
+        tr
+          td.disabled 提现来源
+          td #{UIHelper.parseWithdrawType(_entity.drawCashType)}
+          td.disabled 通道
+          td #{UIHelper.parseWithdrawChannel(_entity.cashdrawChannel)}
+          td.disabled 所属批次
+          td #{_entity.batchNo}
+        if _pointCert && _pointCert.length
+          tr
+            td.disabled 转账凭证
+            td(colspan=5)
+              a(href=_pointCert target='_blank') 查看凭证
+    if _isSpecial
+      table.ui.celled.striped.table
+        thead
+          tr
+            th 备注
+            th.center.aligned 操作时间
+            th.collapsing 操作用户
+        tbody
+          tr
+            td #{_pointRemark}
+            td.center.aligned #{_pointCreateTime ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _pointCreateTime):''}
+            td #{_pointCreateUser}
+  if success
+    +Success(_baseUrl)
+  else if _canReject
+    form#J_withdraw-detail-form.ui.red.segment.form(method='POST')
+      h4.ui.dividing.header 驳回
+      input(type='hidden' name='action' value='reject')
+      input(type='hidden' name='_csrf' value=csrf)
+      if !!(errors) && _isReject
+        +Error(errors)
+      .field.required
+        label 备注内容
+        textarea(name='logDesc' placeholder='备注内容最多500字' maxlength=500 required) #{_query.remark}
+      button.ui.red.submit.button(type='submit') 驳回
+  else if _isRefund
+    form#J_withdraw-detail-form.ui.red.segment.form(method='POST')
+      h4.ui.dividing.header 手动退票
+      input(type='hidden' name='action' value='refund')
+      input(type='hidden' name='_csrf' value=csrf)
+      if !!(errors) && _isRefund
+        +Error(errors)
+      .field.required
+        label 备注内容
+        textarea(name='logDesc' placeholder='备注内容最多500字' maxlength=500 required) #{_query.remark}
+      button.ui.red.submit.button(type='submit') 手动退票
+  else if _isApply
+    form#J_withdraw-detail-form.ui.green.segment.form(method='POST' action=_baseUrl)
+      input(type='hidden' name='action' value='apply')
+      input(type='hidden' name='_csrf' value=csrf)
+      //-
+        h4.ui.dividing.header 再次申请提现
+        if !!(errors) && _isApply
+          +Error(errors)
+        .field
+          label 开户名
+          input(type='text' value=_.get(entity, 'bank.name') disabled)
+        .field
+          label 提现金额
+          input(type='text' value=_entity.amount disabled)
+        .field.required
+          label 开户行
+          select(name='bankCode')
+            each val in UIHelper.bank
+              option(value=val.id selected=val.id==query.bankCode) #{val.name}
+        .field.required
+          label 银行卡号
+          input(type='text' name='cardId' value=query.cardId  placeholder='银行卡号' minlength='14'  maxlength='20' required)
+        .field.required
+          label 重复银行卡号
+          input(type='text' name='repeatCardId' value=query.repeatCardId  placeholder='重复银行卡号' minlength='14'  maxlength='20' required)
+      .ui.buttons
+        button.ui.positive.submit.button(type='submit') 提现
+        .or
+      a(href='/user/'+ _userId +'/bankcard' target='_blank').ui.button 银行卡设置
+
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_withdraw-detail-form': !{JSON.stringify(errors)}});

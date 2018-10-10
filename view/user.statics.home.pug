@@ -1,0 +1,128 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.userId
+  - var _id = _.get(_query, 'userId')
+  - var pageTitle = '统计明细'
+  - var pageClass = 'page-user-statis'
+  - var cashBackAmount = _.get(staticsData, 'cashBackAmount') - 0 || 0
+  - var directlyCashBackAmount = _.get(staticsData, 'directlyCashBackAmount') - 0 || 0
+  - var indirectCashBackAmount = _.get(staticsData, 'indirectCashBackAmount') - 0 || 0
+  - var selfCashBackAmount = _.get(staticsData, 'selfCashBackAmount') - 0 || 0
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.attached.segment
+    table.ui.celled.striped.table
+      tbody
+        tr
+          td.disabled 返现总金额
+          td #{UIHelper.formatMoney(cashBackAmount, 2)}
+          td.disabled 直接返现金额
+          td #{UIHelper.formatMoney(directlyCashBackAmount, 2)}
+          td.disabled 间接返现金额
+          td #{UIHelper.formatMoney(indirectCashBackAmount, 2)}
+          td.disabled 自返现金额
+          td #{UIHelper.formatMoney(selfCashBackAmount, 2)}
+  .ui.attached.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .ui.fields
+        .four.wide.field
+          .ui.selection.dropdown
+            input(type='hidden' name='level' value=_query.level)
+            i.dropdown.icon
+            .default.text 所有好友
+            .menu
+              - var _list = [{k:'0',v:'全部好友层级'}, {k:'1',v:'一级好友'}, {k:'2',v:'二级好友'}, {k:'3',v:'三级好友'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+        .four.wide.field
+          .ui.selection.dropdown
+            input(type='hidden' name='investStatus' value=_query.investStatus)
+            i.dropdown.icon
+            .default.text 所有投资状态
+            .menu
+              - var _list = [{k:'0',v:'全部投资状态'}, {k:'1',v:'未投资'}, {k:'2',v:'已投资'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+      .ui.action.input.four.wide.field
+        input(type='text' name='searchVal' maxlength='20' placeholder='搜索关键字' value=_query.searchVal)
+        .ui.selection.dropdown.attached
+          input(type='hidden' name='searchName' value=_query.searchName)
+          i.dropdown.icon
+          .default.text 搜索字段
+          .menu
+            - var _list = [ {k:'invitedUserPhoneNo',v:'好友手机号'}, {k:'registTime',v:'注册时间'}]
+            each item in _list
+              .item(data-value=item.k) #{item.v}
+        button.ui.attached.primary.button(type='submit') 搜索
+      .ui.right.aligned.grid
+        .column
+          .ui.right.floated.compact.menu
+            a.item(href='/user/'+_id + '/bind')
+              i.plus.icon
+              | 绑定用户
+      if dataList && dataList.length
+        h4.ui.dividing.header 搜索结果
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th 好友手机号
+              th.right.aligned 好友ID
+              th.right.aligned 好友等级
+              th.right.aligned 投资状态
+              th.right.aligned 返现金额
+              th.right.aligned 邀请渠道
+              th.center.aligned 注册时间
+              th.right.aligned 其他奖励
+              th.right.aligned 操作
+          tbody
+            if dataList && dataList.length
+              each val,idx in dataList
+                - var _status = val.investStatus - 0
+                tr
+                  td #{val.invitedUserPhoneNo}
+                  td.right.aligned
+                    a(href='/user/' + val.invitedUserId) #{val.invitedUserId}
+                  td.right.aligned
+                    if val.level == 1
+                      | 一级好友
+                    else if val.level == 2
+                      | 二级好友
+                    else if val.level == 3
+                      | 三级好友
+                  td.right.aligned
+                    if _status == 1
+                      | 未投资
+                    else
+                      | 已投资
+                  td.right.aligned
+                    if val.cashBackAmount
+                      | #{UIHelper.formatNumber(val.cashBackAmount, 2)}
+                  td.right.aligned #{val.inviteChannel}
+                  td.center.aligned #{UIHelper.formatdate('YYYY-MM-DD', val.registTime)}
+                  td.right.aligned
+                    if val.otherReward
+                      | #{UIHelper.formatNumber(val.otherReward, 2)}
+                  td.right.aligned
+                    if val.level == 1
+                      a(href='/user/'+_id + '/unbind?inviteid=' + val.invitedUserId) 解除绑定关系
+                    else
+                      | 解除绑定关系
+          tfoot
+            tr
+              th(colspan='9')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      else
+        +Empty()

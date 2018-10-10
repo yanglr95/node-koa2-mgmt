@@ -1,0 +1,17 @@
+thead.right.aligned 
+  tr
+    th.center.aligned 产品期限
+    th 计划加入总金额
+    th 当前锁定总金额
+    th 退出中本息总额
+    th 已退出总金额
+    th 已收管理费用总额
+tbody.right.aligned 
+  each val,idx in dataList
+    tr
+      td.center.aligned #{val.month}
+      td #{val.joinAcount}
+      td #{val.lockAcount}
+      td #{val.quitAcount}
+      td #{val.exitAcount}
+      td #{val.exitServiceAcount}

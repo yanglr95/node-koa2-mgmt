@@ -1,0 +1,123 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '充值管理'
+  - var pageClass = 'page-charge-index'
+  - var _query = query || {}
+  - var pageUrl = '/charge'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .fields
+        .six.wide.field
+          label 充值时间
+          .two.fields
+            .field
+              input(type='text'
+                class='datetimepicker datetimepicker-date'
+                value= _query.beginTime
+                name='beginTime' maxlength='10' placeholder='开始时间')
+            .field
+              input(type='text'
+                class='datetimepicker datetimepicker-date'
+                value= _query.endTime
+                name='endTime' maxlength='10' placeholder='结束时间')
+        .five.wide.field
+          label 订单状态
+          .ui.selection.dropdown
+            input(type='hidden' name='status' value=_query.status)
+            i.dropdown.icon
+            .default.text 全部状态
+            .menu
+              - var _list = [{k:'',v:'全部状态'},{k:'0',v:'支付中'},{k:'1',v:'充值成功'},{k:'2',v:'充值失败'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+        .five.wide.field
+          label 支付类型
+          .ui.selection.dropdown
+            input(type='hidden' name='payType' value=_query.payType)
+            i.dropdown.icon
+            .default.text 全部类型
+            .menu
+              - var _list = [{k:'',v:'全部类型'},{k:'18',v:'富友'},{k:'20',v:'宝付快捷'},{k:'21',v:'宝付网关'},{k:'22',v:'网易代扣'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+      .twelve.wide.field
+        .ui.action.input
+          input(type='text' name='searchVal' maxlength='20'
+            placeholder='搜索关键字' value=_query.searchVal)
+          .ui.selection.dropdown
+            input(type='hidden' name='searchName' value=_query.searchName)
+            i.dropdown.icon
+            .default.text 搜索字段
+            .menu
+              - var _list = [{k:'userId',v:'用户ID'},{k:'mobile',v:'手机号'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+          button.ui.primary.button(type='submit') 搜索
+          if dataList && dataList.length
+            button.ui.button(type='submit' name='excel' value='excel') 导出
+      if batch && batchResult
+        +BatchMessage(batchResult)
+      if dataList && dataList.length
+        h4.ui.dividing.header 搜索结果
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th
+              th 用户ID
+              th 手机号
+              th.right.aligned 充值金额
+              th.right.aligned 手续费
+              th.center.aligned 下单时间
+              th 恒丰订单号
+              th 商户订单号
+              th.center.aligned 状态
+              th 支付机构
+              th 失败原因
+          tbody
+            each val,idx in dataList
+              tr
+                td.collapsing
+                  .ui.fitted.checkbox.J_item-checkbox
+                    input(type='checkbox' name='ids' value=val.rechargeReqId data-extra={id:val.rechargeReqId})
+                    label
+                td
+                  a(href='/user/'+val.userId target='_blank') #{val.userId}
+                td #{UIHelper.safeMobile(val.mobile)}
+                td.right.aligned #{UIHelper.formatMoney(val.amount)}
+                td.right.aligned #{UIHelper.formatMoney(val.rechargeFee)}
+                td.center.aligned
+                  if val.rechargeTime
+                    | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.rechargeTime)}
+                  else
+                    |  
+                td #{val.outTradeNo}
+                td #{val.netEaseOrderNo}
+                td.center.aligned #{UIHelper.parseChargeStatus(val.status)}
+                td #{val.type}
+                td #{val.reason}
+          tfoot
+            tr
+              th
+                //- 有批量操作
+                if batchList && batchList.length
+                  .ui.fitted.checkbox.J_toggle-checkbox-button
+                    input(type='checkbox' title='全选/反选')
+                    label
+              th(colspan='12')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+                //- 有批量操作
+                if batchList && batchList.length
+                  +Batch(batchList)
+      else
+        +Empty()

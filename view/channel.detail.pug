@@ -1,0 +1,54 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/channel'
+  - var _baseText = '渠道管理'
+  - var _action = _query.id ? '修改':'添加'
+  - var pageTitle = `${_action}渠道`
+  - var pageClass = 'page-channel-create-index'
+  - var pageUrl = '/channel'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) #{_baseText}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_channel-create-form(class='ui stacked green segment form' method='POST')
+    input(type='hidden' name='_csrf' value=csrf)
+    .field.required
+      label 渠道名称
+      input(type='text' name='utmsourceName' value=_query.utmsourceName
+        placeholder='渠道名称' title='渠道名称'
+        required minlength=1 maxlength=20
+      )
+    .field.required
+      label 渠道标识
+      input(type='text' name='utmsource' value=_query.utmsource
+        placeholder='渠道标识' title='渠道标识'
+        required minlength=2 maxlength=20
+      )
+    .inline.fields
+      label 状态
+      .field
+        .ui.radio.checkbox
+          input(type='radio' name='status' checked=!!_query.status tabindex=0 value='true')
+          label 启用
+      .field
+        .ui.radio.checkbox
+          input(type='radio' name='status' checked=!_query.status tabindex=0 value='false')
+          label 禁用
+    .ui.center.aligned.basic.segment
+      .ui.buttons
+        button(class='ui positive button' type='submit') 保存
+        .or
+      button(class='ui button' type='reset') 重置
+    if !!(errors)
+      +Error(errors)
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_channel-create-form': !{JSON.stringify(errors)}});

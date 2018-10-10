@@ -1,0 +1,141 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '债权转让'
+  - var pageClass = 'page-transfer-index'
+  - var pageUrl = '/transfer'
+  - var _currentNav = stepCurrent
+  - var _query = query || {}
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .fields
+        .five.wide.field
+          label 利率
+          .two.fields
+            .field
+              .ui.right.labeled.input
+                input(
+                  type='text' name='minInterest' maxlength='5'
+                  placeholder='下限' value=_query.minInterest)
+                .ui.basic.label %
+            .field
+              .ui.right.labeled.input
+                input(
+                  type='text' name='maxInterest' maxlength='5'
+                  placeholder='上限' value=_query.maxInterest)
+                .ui.basic.label %
+        .five.wide.field
+          label 剩余期限
+          .two.fields
+            .field
+              .ui.right.labeled.input
+                input(
+                  type='text' name='minMonth' maxlength='2'
+                  placeholder='下限' value=_query.minMonth)
+                .ui.basic.label 月
+            .field
+              .ui.right.labeled.input
+                input(
+                  type='text' name='maxMonth' maxlength='2'
+                  placeholder='上限' value=_query.maxMonth)
+                .ui.basic.label 月
+      .fields
+        .five.wide.field
+          label 转让时间
+          .two.fields
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='minTime' maxlength='10'
+                placeholder='转让时间下限' value=_query.minTime)
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='maxTime' maxlength='10'
+                placeholder='转让时间上限' value=_query.maxTime)
+        .four.wide.field
+          label 状态
+          .ui.selection.dropdown
+            input(type='hidden' name='status' value=_query.status)
+            i.dropdown.icon
+            .default.text 全部状态
+            .menu
+              - var _list = [{k:'',v:'全部状态'},{k:'TRANSFERING',v:'正在转让'},{k:'TRANSFERED',v:'转让完毕'},{k:'CANCLE',v:'已取消'},{k:'CLOSED_CANCLE',v:'结标取消'},{k:'OVERDUE_CANCLE',v:'逾期取消'},{k:'PRESALE',v:'转让预售'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+      .ui.action.input.four.wide.field
+        input(type='text' name='searchVal' maxlength='20'
+          placeholder='搜索关键字' value=_query.searchVal)
+        .ui.selection.dropdown
+          input(type='hidden' name='searchName' value=_query.searchName)
+          i.dropdown.icon
+          .default.text 搜索字段
+          .menu
+            - var _list = [{k:'loanTransferId',v:'债转ID'},{k:'loanId',v:'标的ID'},{k:'userId',v:'转出人ID'}]
+            each item in _list
+              .item(data-value=item.k) #{item.v}
+        button.ui.primary.button(type='submit') 搜索
+      if batch && batchResult
+        +BatchMessage(batchResult)
+      if dataList && dataList.length
+        h4.ui.dividing.header 搜索结果
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th
+              th 债转ID
+              th 标的ID
+              th 用户ID
+              th 名称
+              th.right.aligned 初始转让金额
+              th.right.aligned 年利率
+              th.right.aligned 剩余期数
+              th.right.aligned 待转让金额
+              th.center.aligned 开始转让时间
+              th.center.aligned 状态
+          tbody
+            each val,idx in dataList
+              tr
+                td.collapsing
+                  .ui.fitted.checkbox.J_item-checkbox
+                    input(type='checkbox' name='ids' value=val.transferId data-extra={id:val.transferId})
+                    label
+                td
+                  a(href='/transfer/'+val.transferId ) #{val.transferId}
+                td
+                  a(href='/loan/'+val.loanId target='_blank') #{val.loanId}
+                td
+                  a(href='/user/'+val.userId target='_blank') #{val.userId}
+                td
+                  a(href='/transfer/'+val.transferId) #{val.title}
+                td.right.aligned #{UIHelper.formatMoney(val.initTransAmount)}
+                td.right.aligned #{val.interest}%
+                td.right.aligned #{val.leftMonths}/#{val.loanMonths}
+                td.right.aligned #{UIHelper.formatMoney(val.leftTransAmount)}
+                td.center.aligned
+                  if val.transferTime
+                    | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.transferTime)}
+                td.center.aligned #{UIHelper.parseTransferStatus(val.status)}
+          tfoot
+            tr
+              th
+                //- 有批量操作
+                if batchList && batchList.length
+                  .ui.fitted.checkbox.J_toggle-checkbox-button
+                    input(type='checkbox' title='全选/反选')
+                    label
+              th(colspan='10')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+                //- 有批量操作
+                if batchList && batchList.length
+                  +Batch(batchList)
+      else
+        +Empty()

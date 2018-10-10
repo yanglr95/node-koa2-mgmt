@@ -1,0 +1,49 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '监管禁止词'
+  - var pageClass = 'page-product-word-index'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form(class='ui segment form' method='POST')
+    .ui.right.aligned.grid
+      .column
+        .ui.right.floated.compact.menu
+          a.item(href='/channel') 标的渠道
+          a.item(href='/product/words') 监管禁止词
+          a.item(href='/product/create') 
+            i.plus.icon
+            | 添加产品
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    if dataList && dataList.length
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th ID
+            th 产品名称
+            th 所属渠道
+            th 还款方式
+            th 放款模式
+            th 状态
+            th 更新时间
+            th 操作
+          tbody
+           each val,idx in dataList
+            tr
+              td #{val.id}
+              td #{val.productName}
+              td #{val.productName}
+              td #{UIHelper.parseLoanType(val.loanType)}
+              td #{val.cashDrawStrategy}
+              td #{val.status ? '已启用' : '已禁用'}
+              td #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.updateTime)}
+              th
+                a(href='/product/'+val.id) 修改
+    else
+      +Empty()

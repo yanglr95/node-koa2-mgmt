@@ -1,0 +1,15 @@
+mixin StopLoanMessage(data)
+  - var _stopLoanValue = _.get(stopLoanResult, 'value')
+  - var _stopLoanMessage = _.get(stopLoanResult, 'message')
+  - var _stopLoanStatus = _.get(stopLoanResult, 'status')
+  .ui.icon.message
+    i.warning.sign.icon
+    .content
+      .header 终止借款结果
+      .ui.labels
+      if _stopLoanStatus == 0
+        a.ui.label.green
+          | 操作成功
+      else
+        a.ui.label.red
+          .detail #{_stopLoanMessage}

@@ -1,0 +1,56 @@
+.three.fields
+  .eight.wide.field
+    .two.fields
+      .field
+        input(
+          type='text' name='interest' maxlength='10'
+          placeholder='折扣金额' value=_query.ValueOrRate)
+      .field
+        input(
+          type='text' name='minInvestment' maxlength='10'
+          placeholder='最低投资金额' value=_query.minInvestment)
+  .four.wide.field
+    .ui.selection.dropdown
+      input(type='hidden' name='status' value=_query.status)
+      i.dropdown.icon
+      .default.text 所有类型
+      .menu
+        - var _list = [{k:'',v:'全部'}, {k:'ENABLED',v:'生效中'}, {k:'DISABLED',v:'已失效'}]
+        each item in _list
+          .item(data-value=item.k) #{item.v}
+  .four.wide.field
+    .ui.selection.dropdown
+      input(type='hidden' name='type' value=_query.issueStrategy)
+      i.dropdown.icon
+      .default.text 所有类型
+      .menu
+        - var _list = [{k:'',v:'全部发放类型'}, {k:'AUTO',v:'自动发放'}, {k:'MANUAL',v:'手动发放'},  {k:'SERIAL',v:'兑换码'}]
+        each item in _list
+          .item(data-value=item.k) #{item.v}
+.ui.action.input.four.wide.field
+  input(type='text' name='searchVal' maxlength='20' placeholder='搜索关键字' value=_query.searchValue)
+  .ui.selection.dropdown.attached
+    input(type='hidden' name='searchName' value=_query.searchName)
+    i.dropdown.icon
+    .default.text 搜索字段
+    .menu
+      - var _list = [{k:'BATCH_NAME',v:'名称'},{k:'ID',v:'批次ID'}]
+      each item in _list
+        .item(data-value=item.k) #{item.v}
+  button.ui.attached.primary.button(type='submit') 搜索
+  if dataList && dataList.length
+    button.ui.button(type='submit' name='excel' value='excel') 导出
+.ui.right.aligned.grid
+  .column
+    .ui.right.floated.compact.menu
+      a.item(href='/discount/coupon/create')
+        i.plus.icon
+        | 新建
+.ui.right.aligned.grid
+  .column
+    .ui.right.floated 累计折扣金额：#{UIHelper.formatNumber(totalDiscountMoney, 2)}元
+if dataList && dataList.length
+  table(class='ui compact striped celled table')
+    include discount.index.table.coupon.pug
+else
+  +Empty()

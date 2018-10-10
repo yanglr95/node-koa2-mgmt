@@ -1,0 +1,222 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _id = _query.id
+  - var pageTitle = _id ? '修改计划' : '发布计划'
+  - var pageClass = 'page-plan-detail page-plan-create'
+  - var pageUrl = '/plan'
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/plan') 计划管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_plan-create-form(class='ui stacked green segment form' method='POST')
+    if !!(errors)
+      +Error(errors)
+    h3.ui.dividing.header 基础信息
+    input(type='hidden' name='_csrf' value=csrf)
+    input(type='hidden' name='novice' value=_query.novice)
+    .ui.equal.width.fields
+      .field.required
+        label 计划类型
+        input#J_plan-type(type='text' name='financePlanType' placeholder='计划类型' value=(_query.novice ? '新手专享':'常规计划') readonly maxlength=20 required)
+      .field(class={'ui tab' : !_query.novice})
+        label 贴息利率
+        input#J_subsidy-interest(type='text' name='subsidyInterestRate' placeholder='贴息利率' value=_query.subsidyInterestRate maxlength=20 
+        required = (!_query.novice ? true :false) disabled=(_query.novice) ? false : true)
+    .ui.equal.width.fields
+      .field.required
+        label 发布额度
+        input(type='text' name='amount' placeholder='计划发布额度' value=_query.amount maxlength=20 required)
+      .field.required
+        label 开始加入时间
+        input#J_plan-start-time.datetimepicker.datetimepicker-datetime(
+          type='text' name='beginResellingTimeNew' value=_query.beginResellingTimeNew
+          placeholder='开始加入时间' maxlength=20 required)
+      .field
+        label 发布时间
+        input#J_plan-release-time.datetimepicker.datetimepicker-datetime(
+          type='text' name='planSellingTime' value=!!_query.immediately?'':_query.planSellingTime
+          placeholder='发布时间' maxlength=20 disabled=!!_query.immediately)
+      .field
+        label 选择计划类型
+        select.ui.fluid.dropdown#J_plan_cashtype(placeholder='选择计划类型', name='cashType')
+          option(value='INVEST') 利息复投
+          option(value='HXB') 利息返还
+      .field
+        label 是否立即发布
+        .ui.checkbox
+          input#J_plan-immediately-release(type='checkbox' name='immediately' value='true' checked=!!_query.immediately)
+          label 立即发布
+    .ui.equal.width.fields
+      .field.required
+        label 计划名称
+        input#J_plan-name(type='text' name='name' placeholder='计划名称' value=_query.name maxlength=20 required)
+      .field.required
+        label 销售结束时间
+        input.datetimepicker.datetimepicker-datetime(
+          type='text' name='endSellingTimeStr' value=_query.endSellingTimeStr
+          placeholder='销售结束时间' maxlength=20 required)
+      .field.required
+        label 退出时间
+        input#J_plan-quit-time.datetimepicker.datetimepicker-datetime(
+          type='text' name='quitTime' value=_query.quitTime
+          placeholder='退出时间' readonly maxlength=20 required)
+    .ui.equal.width.fields
+      .field.required
+        label 预期收益率
+          span.J_accrual （复利）
+        input#J_plan-compound-rate(
+          type='text' name='compoundRate' value=_query.compoundRate
+          placeholder='预期收益率（复利）' maxlength=6 required)
+      .field.required
+        label 基准利率
+          span.J_accrual （复利）
+        input#J_plan-base-rate(
+          type='text' name='baseInterestRate' value=(_query.financePlanType == 'NOVICE' ? _query.compoundRate : _query.baseInterestRate)
+          placeholder='基准利率（复利）' maxlength=6 required)
+      .field.required(class={ 'ui tab' : _query.novice==1})
+        label 加息利率
+        input#J_plan-extra-rate(
+          type='text' name='extraInterestRate' value=_query.extraInterestRate
+          placeholder='加息利率' readonly maxlength=6 required disabled=(_query.financePlanType == 'NOVICE') ? true : false)
+    .ui.equal.width.fields
+      .field
+        label 运营文案
+        input(type='text' name='tag' value=_query.tag placeholder='运营文案' maxlength=8)
+      .field.required
+        label 预期收益率（单利）
+        input#J_plan-rate(type='text' name='expectedRateUplan' value=_query.expectedRateUplan
+          placeholder='预期收益率（单利）' maxlength=6 required)
+      .field
+        label 产品期限(锁定期)
+        .ui.right.labeled.input
+          input#J_plan-duration-months(type='text' name='lockPeriod' value=_query.lockPeriod
+            placeholder='产品期限' maxlength=2 required)
+          input#J_plan_dateType(type='hidden' name='dateType' value=_query.dateType)
+          .ui.label #{_query.dateType == 'DAY'? '天':'月'}
+    .ui.equal.width.fields
+      .field.required
+        label 起投金额(可加入额度下限)
+        .ui.right.labeled.input
+          input(type='text' name='minRegisterAmount' value=_query.minRegisterAmount
+            placeholder='可加入额度下限' maxlength=20 required)
+          .ui.label 元
+      .field.required
+        label 递增金额(追加金额倍数)
+        .ui.right.labeled.input
+          input(type='text' name='appendMultipleAmount' value=_query.appendMultipleAmount
+            placeholder='追加金额倍数' maxlength=6 required)
+          .ui.label 的整数倍
+      .field.required
+        label 最大加入金额(可加入额度上限)
+        .ui.right.labeled.input
+          input(type='text' name='singleMaxRegisterAmount' value=_query.singleMaxRegisterAmount
+            placeholder='最大加入金额(可加入额度上限)' maxlength=20 required)
+          .ui.label 元
+    .ui.equal.width.fields
+      .field.required
+        label 申请期天数
+        .ui.right.labeled.input
+          input#J_plan-sale-days(type='text' name='salePeriod' value=_query.salePeriod
+            placeholder='申请天数' maxlength=3 required)
+          .ui.label 天
+      .field.required
+        label 提前退出费率
+        .ui.right.labeled.input
+          input(type='text' name='quitRateAdvance' value=_query.quitRateAdvance
+            placeholder='提前退出费率' maxlength=6 required)
+          .ui.label %
+      .field
+        .fields.width.ui
+          .field
+            label 付息日
+            .ui.right.labeled.input
+              | 每月
+              input#J_plan_permonth_days(type='text' disabled name='perMonth' placeHolder='付息日')
+              | 日
+          .field
+            label 可投散标产品
+            .ui.checkbox
+              input(type='checkbox' name='buyLoanProduct' checked disabled)
+    //-
+      .ui.four.fields
+        .field
+          label 适合人群
+          select.ui.dropdown(name='riskType')
+            option(value='CONSERVATIVE' selected=_query.riskType && _query.riskType === 'CONSERVATIVE') 保守型
+            option(value='PRUDENT' selected=_query.riskType && _query.riskType === 'PRUDENT') 稳健型
+            option(value='PROACTIVE' selected= _query.riskType && _query.riskType === 'PROACTIVE') 积极应对
+    .ui.equal.width.fields
+      .field.required
+        label 冷静期期限
+        .ui.right.labeled.input
+          input(type='text' name='coolingOffPeriod' value=_query.coolingOffPeriod || 0
+            placeholder='冷静期期限' maxlength=3 required)
+          .ui.label 分钟
+      .field.required    
+    .ui.equal.width.fields
+      .field.required
+        label 计划介绍
+        textarea(name='introduce' placeholder='计划介绍最多500字' maxlength=500 required) #{_query.introduce}
+    h3.ui.dividing.header 运行参数
+    .ui.four.fields.required
+      .field
+        label 余额最小投资比例
+        .ui.right.labeled.input
+          input(type='text' name='minInvestRate' value=_query.minInvestRate
+            placeholder='余额最小投资比例' maxlength=2 required)
+          .ui.label %
+      .field
+        label 最小投资金额
+        .ui.right.labeled.input
+          input(type='text' name='minInvestAmount' value=_query.minInvestAmount
+            placeholder='最小投资金额' maxlength=20 required)
+          .ui.label 元
+      .field
+        label 单笔投资比例上限
+        .ui.right.labeled.input
+          input(type='text' name='maxInvestRate' value=_query.maxInvestRate 
+            placeholder='单笔投资比例上限' maxlength=20 required)
+          .ui.label %
+      .field
+    .fields.required
+      .eight.wide.field
+        label  投标利率限制
+        .two.fields
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanLowestRate' value=_query.loanLowestRate
+                placeholder='投标利率下限' maxlength=6 required)
+              .ui.label %
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanHighestRate' value=_query.loanHighestRate
+                placeholder='投标利率上限' maxlength=6 required)
+              .ui.label %
+      .eight.wide.field
+        label  投标期限限制
+        .two.fields
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanLowestPeriod' value=_query.loanLowestPeriod
+                placeholder='投标期限下限' maxlength=2 required)
+              .ui.label 月
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanHightestPeriod' value=_query.loanHightestPeriod
+                placeholder='投标期限上限' maxlength=2 required)
+              .ui.label 月
+    .ui.buttons
+      button.ui.positive.button(type='submit') #{pageTitle}
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_plan-create-form': !{JSON.stringify(errors)}});
+  script.
+    app.handler('planCreate')({
+        template: !{JSON.stringify(planTemplate||'')}
+      });

@@ -1,0 +1,58 @@
+thead
+  tr
+    th 计划ID
+    th 计划
+    th 预期年收益
+    th.right.aligned 加入金额
+    th.right.aligned 可用金额
+    th.right.aligned 按日已获收益
+    th.right.aligned 已获收益
+    th.center.aligned 加入时间
+    th.center.aligned 锁定期结束时间
+    th.center.aligned 退出方式
+    th.center.aligned 收益处理方式
+    th.center.aligned 付息日
+    th.center.aligned 申请退出
+    th.center.aligned 退出日    
+    th 状态
+    th.right.aligned 操作
+    th.right.aligned 提前退出
+tbody
+  each val,idx in dataList
+    tr
+      td #{val.financePlanId}
+      td
+        a(href='/plan/' + val.financePlanId) #{val.financePlanName}
+      td.right.aligned #{val.expectedRateUplan}%
+      td.right.aligned #{UIHelper.formatMoney(val.finalAmount)}
+      td.right.aligned #{UIHelper.formatMoney(val.availablePrincipal)}
+      td.right.aligned #{UIHelper.formatMoney(val.dailyEarnInterest)}
+      td.right.aligned #{UIHelper.formatMoney(val.totalEarnInterest)}
+      td.center.aligned #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.registeredTime)}
+      td.center.aligned #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.endLockingTime)}
+      td.center.aligned #{UIHelper.parsePlanQuitWay(val.quitStatus)}
+      td.center.aligned #{UIHelper.parsePlanCashType(val.cashDrawType)}
+      td.center.aligned
+        if val.cashDrawDay
+          | 每月#{val.cashDrawDay}日  
+        else 
+          | --
+      td.center.aligned
+        if val.requestQuitDate
+          | #{UIHelper.formatdate('YYYY-MM-DD', val.requestQuitDate)}
+        else
+          | --
+      td.center.aligned
+        if val.quitDate
+          | #{UIHelper.formatdate('YYYY-MM-DD', val.quitDate)}
+        else
+          | --
+      td #{val.statusText}
+      td.right.aligned
+        a(href=_baseUrl + '/plan/' + val.financePlanId) 投标记录
+      td.right.aligned
+        a(href=_baseUrl + '/plan/' + val.financePlanId + '/quit') 退出
+tfoot
+  tr
+    th(colspan='18')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)

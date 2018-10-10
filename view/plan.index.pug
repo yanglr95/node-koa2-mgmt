@@ -1,0 +1,129 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '计划管理'
+  - var pageClass = 'page-plan-index'
+  - var _currentNav = stepCurrent
+  - var _query = query || {}
+  - var pageUrl = '/plan'
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .fields
+        .three.wide.field
+          label 期限
+          .ui.action.input
+            .ui.search.selection.dropdown
+              input(type='hidden' name='lockPeriod' value=_query.lockPeriod)
+              i.dropdown.icon
+              .default.text 全部期限
+              .menu
+                .item(data-value='') 全部期限
+                each v in _.range(1, 37)
+                  .item(data-value=v) #{v}个月
+        .five.wide.field
+          label 类型
+          .ui.action.input
+            .ui.selection.dropdown
+              input(type='hidden' name='financePlanType' value=_query.financePlanType)
+              i.dropdown.icon
+              .default.text 全部类型
+              .menu
+                - var _list = [{k:'',v:'全部类型'}, {k:'GENERAL', v:'常规计划'}, {k:'NOVICE', v:'新手计划'}]
+                each item in _list
+                  .item(data-value=item.k) #{item.v}
+            button.ui.attached.primary.button(type='submit') 搜索
+            if dataList && dataList.length
+              button.ui.button(type='submit' name='excel' value='excel') 导出
+      if dataList && dataList.length
+        table(class='ui compact striped stackable celled table')
+          thead
+            tr
+              th
+              th 计划ID
+              th 计划名称
+              th.right.aligned 期限
+              th.right.aligned 利率
+              th.right.aligned 额度
+              th.right.aligned 实际加入金额
+              th.right.aligned 可用额度
+              th.center.aligned 状态
+              th.right.aligned 类型
+              th.right.aligned 开始加入时间
+              th.right.aligned 结束销售时间
+              th.right.aligned 锁定期结束日
+              th.center.aligned 收益处理方式
+              th.center.aligned 计息日
+              th 加入详情
+              th 访问
+              th 修改人
+              th.center.aligned 操作
+          tbody
+            each val,idx in dataList
+              - var _allowAccess = val.allowAccess ? true : false
+              - var _planStatus = val.status
+              tr
+                td.collapsing
+                  .ui.fitted.checkbox.J_item-checkbox
+                    input(type='checkbox' name='ids' value=val.id data-extra={id:val.id})
+                    label
+                td #{val.id}
+                td: a(href='/plan/'+val.id) #{val.name}
+                td.right.aligned #{val.lockPeriod}#{val.dateType=='DAY'? '天': '个月'}
+                td.right.aligned #{val.expectedRate}%
+                td.right.aligned #{UIHelper.formatNumber(val.amount)}
+                td.right.aligned #{UIHelper.formatNumber(val.actualAmount)}
+                td.right.aligned #{UIHelper.formatNumber(val.sumAvailablePrincipal)}
+                td.center.aligned #{UIHelper.parsePlanStatus(_planStatus == 'REDEMPTION_PERIOD' ? (val.id > 675 ? _planStatus : _planStatus = 'PLAN_CLOSED') : _planStatus)}
+                td.right.aligned #{UIHelper.parsePlanFinancePlanType(val.financePlanType)}
+                td.right.aligned #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.beginSellingTime)}
+                td.right.aligned #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.endSellingTime)}
+                td.right.aligned #{UIHelper.formatdate('YYYY-MM-DD', val.endLockingTime)}
+                td.center.aligned #{UIHelper.parsePlanCashType(val.cashType)}
+                td.center.aligned 
+                  if val.cashDrawDay
+                    | 每月#{val.cashDrawDay}日  
+                  else 
+                    | --       
+                td
+                  a(href='/plan/'+val.id+'/record') 加入详情
+                td.center.aligned(class={'positive': _allowAccess, 'negative': !_allowAccess})
+                  if _allowAccess
+                    i.unhide.icon
+                  else
+                    i.hide.icon
+                td #{val.updateUser||val.createUser}
+                td.center.aligned
+                  if _allowAccess
+                    a.ui.icon.tiny.negative.button.J_update(href='###'
+                        data-url='/plan/update/'+val.id
+                        data-post=JSON.stringify({act:'forbid'}) title='禁止访问')
+                      i.hide.icon
+                  else
+                    a.ui.icon.tiny.positive.button.J_update(href='###'
+                        data-url='/plan/update/'+val.id
+                        data-post=JSON.stringify({act:'allow'}) title='允许访问')
+                      i.unhide.icon
+          tfoot
+            tr
+              th
+                //- 有批量操作
+                if batchList && batchList.length
+                  .ui.fitted.checkbox.J_toggle-checkbox-button
+                    input(type='checkbox' title='全选/反选')
+                    label
+              th(colspan='19')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+                //- 有批量操作
+                if batchList && batchList.length
+                  +Batch(batchList)
+      else
+        +Empty()

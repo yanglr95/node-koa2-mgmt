@@ -1,0 +1,40 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '权限管理'
+  - var pageClass = 'page-role-index'
+  - var pageUrl = '/role'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if dataList && dataList.length
+    form#J_product-query-form(class='ui segment form' method='POST')
+      input(type='hidden' name='_csrf' value=csrf)
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th 权限
+            each role,index in roleList
+              th #{role.role_name}
+                input(type='hidden' name='roles' value=role.role_id)
+          tbody
+            each val,idx in dataList
+              - var _taskId = val.task_id
+              - var _roleMap = val.roleMap
+              tr
+                td #{val.task_display_name}
+                each role,index in roleList
+                  - var _roleId = role.role_id
+                  td
+                    .ui.checkbox
+                      input(type='checkbox' name=`role_${_roleId}` checked=_roleMap[_roleId] value=_taskId)
+      .ui.center.aligned.basic.segment
+        .ui.buttons
+          button(class='ui positive button' type='submit') 保存
+          .or
+        button(class='ui button' type='reset') 重置
+  else
+    +Empty()

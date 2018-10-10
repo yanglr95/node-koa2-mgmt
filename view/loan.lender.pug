@@ -1,0 +1,52 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _id = _query.loanId
+  - var pageTitle = '标的债权人'
+  - var pageClass = 'page-loan-lender'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/loan') 标的管理
+    i.right.angle.icon.divider
+    a.section(href='/loan/'+_id) 标的详情
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if dataList && dataList.length
+    .ui.segment
+      h4.ui.dividing.header #{pageTitle}
+      table.ui.compact.celled.striped.table
+        thead
+          tt
+            th 用户ID
+            th 用户名
+            th 真实姓名
+            th 计划ID
+            th.center.aligned 投标时间
+            //-
+              th 本息
+            th 待还本金
+            th.center.aligned 自动投标
+        tbody
+          each val,idx in dataList
+            - _isAutoVest = val.autoVest
+            tr
+              td
+                a(href='/user/'+val.userId) #{val.userId}
+              td #{val.nickName}
+              td #{val.userName}
+              td #{val.financePlanId}
+              td.center.aligned #{val.lendTime}
+              //-
+                td #{UIHelper.formatMoney(val.interestAndAmount)}
+              td #{UIHelper.formatMoney(val.lendAmount)}
+              td.center.aligned(class={'positive': _isAutoVest, 'negative': !_isAutoVest})
+                if _isAutoVest
+                  i.checkmark.icon
+                else
+                  i.remove.icon
+  else
+    +Empty()

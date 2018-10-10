@@ -1,0 +1,37 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var val = _entity
+  - var pageTitle = _query.dueDate? _query.dueDate : '历史记录详情'
+  - var pageClass = 'page-repayment-history-detail'
+  - var pageUrl = '/repayment/history'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/repayment') 还款管理
+    i.right.angle.icon.divider
+    a.section(href='/repayment/history') 历史记录
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    h4.ui.dividing.header #{pageTitle}
+    table(class='ui compact striped celled table')
+      thead
+        tr
+          th.center.aligned 名称
+          th.right.aligned 正常还款笔数
+          th.right.aligned 正常还款金额
+          th.right.aligned 提前还款笔数
+          th.right.aligned 提前结清金额
+      tbody
+        tr
+          td.center.aligned #{val.utmSourceName}
+          td.right.aligned #{val.commonRepayCount}
+          td.right.aligned #{UIHelper.formatMoney(val.commonRepayAmount)}
+          td.right.aligned #{val.inRepayCount}
+          td.right.aligned #{UIHelper.formatMoney(val.inRepayAmount)}
+

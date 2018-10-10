@@ -1,0 +1,54 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var pageTitle = 'app意见反馈'
+  - var pageClass = 'page-feedback-index'
+  - var pageUrl = '/app/feedback'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_product-query-form(class='ui segment form' method='POST')
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    .fields
+      .five.wide.field
+        label 申请日期
+        .two.fields
+          .field
+            input.datetimepicker.datetimepicker-date(
+              type='text' name='startDate' maxlength='10'
+              placeholder='下限' value=_query.startDate)
+          .field
+            input.datetimepicker.datetimepicker-date(
+              type='text' name='endDate' maxlength='10'
+              placeholder='上限' value=_query.endDate)
+    button.ui.primary.button(type='submit') 搜索
+    if dataList && dataList.length
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th 用户ID
+            th 版本
+            th 型号
+            th 系统
+            th 内容
+            th 时间
+          tbody
+           each val,idx in dataList
+            tr
+              td
+                a(href='/user/'+ val.userId) #{val.userId}
+              td #{val.clientVersion}
+              td #{val.model}
+              td #{val.sysVersion}
+              td #{val.suggest}
+              td 
+                if val.createTime
+                  | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.createTime)}
+    else
+      +Empty()

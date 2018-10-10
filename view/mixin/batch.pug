@@ -1,0 +1,10 @@
+mixin Batch(list)
+  .ui.right.action.input
+    .ui.compact.selection.dropdown
+      input(type='hidden' name='batch')
+      i.dropdown.icon
+      .default.text 批量操作
+      .menu
+        each item in list
+          .item(data-value=item.k) #{item.v}
+    button.ui.compact.right.button.J_batch-button(type='button') 应用操作

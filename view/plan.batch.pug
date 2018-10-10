@@ -1,0 +1,150 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '计划参数'
+  - var pageClass = 'page-plan-batch'
+  - var _query = query || {}
+  - var pageUrl = '/plan/batch'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/plan') 计划管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_plan-batch-form(class='ui green segment form' method='POST')
+    if !!(errors)
+      +Error(errors)
+    h4.ui.top.attached.block.header 选择批量修改计划应用范围
+    .ui.attached.segment
+      input(type='hidden' name='action' value='batch')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .ui.equal.width.fields
+        .field
+          label 计划期限
+          .ui.search.selection.dropdown
+            input(type='hidden' name='lockPeriod' value=_query.lockPeriod)
+            i.dropdown.icon
+            .default.text 全部期限
+            .menu
+              .item(data-value='') 全部期限
+              each v in _.range(1, 37)
+                .item(data-value=v) #{v}个月
+    h4.ui.top.bottom.attached.block.header 选择批量修改计划参数
+    .ui.attached.segment
+      .ui.four.fields.required
+        .field
+          label 余额最小投资比例
+          .ui.right.labeled.input
+            input(type='text' name='minInvestRate' value=_query.minInvestRate
+              placeholder='余额最小投资比例' maxlength=2 required)
+            .ui.label %
+        .field
+          label 最小投资金额
+          .ui.right.labeled.input
+            input(type='text' name='minInvestAmount' value=_query.minInvestAmount
+              placeholder='最小投资金额' maxlength=20 required)
+            .ui.label 元
+        .field
+          label 单笔投资比例上限
+          .ui.right.labeled.input
+            input(type='text' name='maxInvestRate' value=_query.maxInvestRate 
+              placeholder='单笔投资比例上限' maxlength=20 required)
+            .ui.label %
+        .field
+      .ui.equal.width.fields.required
+        .eight.wide.field
+          label  投标利率限制
+          .two.fields
+            .field
+              .ui.right.labeled.input
+                input(type='text' name='loanLowestRate' value=_query.loanLowestRate
+                  placeholder='投标利率下限' maxlength=6 required)
+                .ui.label %
+            .field
+              .ui.right.labeled.input
+                input(type='text' name='loanHighestRate' value=_query.loanHighestRate
+                  placeholder='投标利率上限' maxlength=6 required)
+                .ui.label %
+        .eight.wide.field
+          label  投标期限限制
+          .two.fields
+            .field
+              .ui.right.labeled.input
+                input(type='text' name='loanLowestPeriod' value=_query.loanLowestPeriod
+                  placeholder='投标期限下限' maxlength=2 required)
+                .ui.label 月
+            .field
+              .ui.right.labeled.input
+                input(type='text' name='loanHightestPeriod' value=_query.loanHightestPeriod
+                  placeholder='投标期限上限' maxlength=2 required)
+                .ui.label 月
+      .ui.buttons
+        button.ui.right.floated.positive.button(type='submit') 批量修改
+    if updateSuccess
+      +Success().attached
+  h3.ui.top.attached.block.header 运行中计划
+  form(class='ui attached segment form' method='POST')
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    if dataList && dataList.length
+      table(class='ui compact striped stackable celled table')
+        thead
+          tr
+            th 计划ID
+            th 名称
+            th.right.aligned 期限
+            th.right.aligned 利率
+            th.right.aligned 可用额度
+            th.right.aligned 已投标额度
+            th.right.aligned 加入人数
+            th.center.aligned 状态
+            th.right.aligned 投标利率
+            th.right.aligned 投标期限
+            th.right.aligned 收益处理方式
+            th.right.aligned 付息日            
+            th.right.aligned 最小投资金额
+            th.right.aligned 再投资最小比例
+            th.right.aligned 单笔投资比例上限
+            th.right.aligned 锁定期结束日
+        tbody
+          each val,idx in dataList
+            - var _planStatus = val.status
+            tr
+              td #{val.id}
+              td: a(href='/plan/'+val.id) #{val.name}
+              td.right.aligned #{val.lockPeriod}#{val.dateType=='DAY'? '天': '个月'}
+              td.right.aligned #{val.expectedRate}%
+              td.right.aligned #{UIHelper.formatNumber(val.sumAvailablePrincipal)}
+              td.right.aligned #{UIHelper.formatMoney(val.sumBidAmount)}
+              td.right.aligned #{UIHelper.formatNumber(val.totalRegisterCount)}
+              td.center.aligned #{UIHelper.parsePlanStatus(_planStatus == 'REDEMPTION_PERIOD' ? (val.id > 675 ? _planStatus : _planStatus = 'PLAN_CLOSED') : _planStatus)}
+              td.right.aligned #{val.loanLowestRate}-#{val.loanHighestRate}%
+              td.right.aligned #{val.loanLowestPeriod}-#{val.loanHightestPeriod}个月
+              td.right.aligned #{UIHelper.parsePlanCashType(val.cashType)}
+              td.right.aligned
+                if val.cashDrawDay
+                  | 每月#{val.cashDrawDay}日  
+                else 
+                  | --            
+              td.right.aligned #{UIHelper.formatNumber(val.minInvestAmount)}
+              td.right.aligned #{val.minInvestRate}%
+              td.right.aligned #{val.maxInvestRate}%
+              td.right.aligned #{val.endLockingTime ? UIHelper.formatdate('YYYY-MM-DD', val.endLockingTime) : ''}
+        tfoot
+          tr
+            th(colspan='14')
+              +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+              //- 有批量操作
+              if batchList && batchList.length
+                +Batch(batchList)
+    else
+      +Empty()
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_plan-batch-form': !{JSON.stringify(errors)}});

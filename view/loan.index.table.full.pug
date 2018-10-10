@@ -1,0 +1,56 @@
+thead
+  tr
+    th
+    th 进件号
+    th 标的ID
+    th 用户ID
+    th 标题
+    th.right.aligned 合同借款金额
+    th.right.aligned 利率
+    th.right.aligned 期限
+    th.right.aligned 状态
+    th.right.aligned 备注
+    th.center.aligned 申请时间
+    th.center.aligned 访问
+tbody
+  each val,idx in dataList
+    - var _allowAccess = val.allowAccess ? true : false
+    tr
+      td.collapsing
+        .ui.fitted.checkbox.J_item-checkbox
+          input(type='checkbox' name='ids' value=val.loanId data-extra={id:val.loanId})
+          label
+      td #{val.refId}
+      td #{val.loanId}
+      td
+        a(href='/user/'+val.userId target='_blank') #{val.userId}
+      td
+        a(href='/loan/'+val.loanId) #{val.title}
+      td.right.aligned #{UIHelper.formatMoney(val.amount)}
+      td.right.aligned #{val.interestRate}%
+      td.right.aligned #{val.months}个月
+      td.right.aligned #{UIHelper.parseLoanStatus(val.status).name}
+      td.right.aligned #{val.remarks}
+      td.center.aligned
+        if val.applyTime
+          | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.applyTime - 0)}
+        else
+          |  
+      td.center.aligned(class={'positive': _allowAccess, 'negative': !_allowAccess})
+        if _allowAccess
+          i.unhide.icon
+        else
+          i.hide.icon
+tfoot
+  tr
+    th
+      //- 有批量操作
+      if batchList && batchList.length
+        .ui.fitted.checkbox.J_toggle-checkbox-button
+          input(type='checkbox' title='全选/反选')
+          label
+    th(colspan='11')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      //- 有批量操作
+      if batchList && batchList.length
+        +Batch(batchList)

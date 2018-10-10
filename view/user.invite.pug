@@ -1,0 +1,51 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _id = _.get(_query, 'id')
+  - var _isAvailable = !!_.get(entity, 'sourceValue')
+  - var _entity = entity || {}
+  - var _action = action
+  - var pageTitle = _isAvailable ? '修改邀请码' : '添加邀请码'
+  - var pageClass = 'page-user-invite'
+  if _action=='edit'
+    - pageTitle = '修改邀请码'
+    - _isAvailable = true
+  else if _action=='add'
+    - pageTitle = '添加邀请码'
+    - _isAvailable = false
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if success && _action
+    +Success(_baseUrl)
+  else
+    form#J_user-invite-form(method='POST' class='ui green segment form')
+      h4.ui.dividing.header #{pageTitle}
+      if !!(errors)
+        +Error(errors)
+      input(type='hidden' name='_csrf' value=csrf)
+      .field.required
+        label 邀请码
+        input(
+          type='text' name='investCode'
+          value=query.investCode||_entity.sourceValue
+          placeholder='邀请码' minlength=1 maxlength=200 required)
+      if _isAvailable
+        input(type='hidden' name='action' value='edit')
+      else
+        input(type='hidden' name='action' value='add')
+      button.ui.positive.submit.button(type='submit') #{pageTitle}
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_user-invite-form': !{JSON.stringify(errors)}});

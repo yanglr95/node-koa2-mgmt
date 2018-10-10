@@ -1,0 +1,103 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '用户管理'
+  - var pageClass = 'page-user-index'
+  - var pageUrl = '/user'
+
+block content
+  - var _query = query || {}
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .three.fields
+        .eight.wide.field
+          label 注册日期下限
+          .two.fields
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='startDate' maxlength='10'
+                placeholder='注册日期下限' value=_query.startDate)
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='endDate' maxlength='10'
+                placeholder='注册日期上限' value=_query.endDate)
+        .four.wide.field
+          label 账户类型
+          .ui.selection.dropdown
+            input(type='hidden' name='userRole' value=_query.userRole)
+            i.dropdown.icon
+            .default.text 所有类型
+            .menu 
+              - var _list = [{k:'',v:'所有类型'}, {k:'LENDER',v:'理财用户'}, {k:'BORROWER',v:'借款用户'}, {k:'PLATFORM',v:'机构用户'}, {k:'CHANNEL',v:'渠道'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+      .ui.action.input.four.wide.field
+        input(type='text' name='searchVal' maxlength='20' placeholder='搜索关键字' value=_query.searchVal)
+        .ui.selection.dropdown.attached
+          input(type='hidden' name='searchName' value=_query.searchName)
+          i.dropdown.icon
+          .default.text 搜索字段
+          .menu
+            - var _list = [{k:'userId',v:'用户ID'},{k:'username',v:'用户名'},{k:'realName',v:'真实姓名'},{k:'mobile',v:'手机号'},{k:'source',v:'来源'}]
+            each item in _list
+              .item(data-value=item.k) #{item.v}
+        button.ui.attached.primary.button(type='submit') 搜索
+
+      if dataList && dataList.length
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th 用户ID
+              th 用户名
+              th.center.aligned 状态
+              th.right.aligned 账户余额
+              th.right.aligned 可用余额
+              th.right.aligned 冻结金额
+              th.right.aligned 持有资产
+              th.center.aligned 实名开户
+              th.center.aligned 银行卡状态
+              th.center.aligned 注册时间
+          tbody
+            each val,idx in dataList
+              - var _isTrust = !!_.get(val, 'isCreateEscrowAcc')
+              - var _isAuth = !!_.get(val, 'idCardAuth')
+              - var _isBindCard = !!_.get(val, 'bindCard')
+              tr
+                td #{val.id}
+                td: a(href='/user/'+val.id) #{val.userName}
+                td.center.aligned
+                  a(href='/user/'+val.id+'/forbid') #{val.status ? '全部启用' : '部分禁用'}
+                td.right.aligned #{UIHelper.formatMoney(val.totalFunds)}
+                td.right.aligned #{UIHelper.formatMoney(val.availableBalance)}
+                td.right.aligned #{UIHelper.formatMoney(val.freezeBalance)}
+                td.right.aligned #{UIHelper.formatMoney(val.assets)}
+                td.center.aligned
+                  if !_isAuth
+                    a(href='/user/'+val.id+'/idcard') 未实名
+                  else if _isAuth && !_isTrust
+                    a(href='/user/'+val.id+'/openaccount') 已实名未开户
+                  else if _isTrust
+                    | 已开户
+                  else
+                    | ?
+                td.center.aligned
+                  a(href='/user/'+val.id+'/bankcard') #{_isBindCard ? '已绑卡' : '未绑卡'}
+                td.center.aligned
+                  if val.regDate
+                    | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.regDate - 0)}
+                  else
+                    |  
+          tfoot
+            tr
+              th(colspan='10')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      else
+        +Empty()

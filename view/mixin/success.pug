@@ -1,0 +1,14 @@
+mixin Success(url)
+  - var _url = url || '?'
+  if _url.indexOf('?') == -1
+    - _url = _url + '?'
+  else
+    - _url = _url + '&'
+  - _url = _url + '_=' + Math.random().toString().substr(2)
+  .ui.positive.message(class!=attributes.class)
+    .header 操作成功!
+    p 
+      if attributes.action
+        | #{attributes.action}
+      | 操作成功, 请勿刷新页面 
+      a(href=_url) 立即查看结果

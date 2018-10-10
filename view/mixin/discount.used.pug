@@ -1,0 +1,8 @@
+mixin DiscountUsed(usedType)
+  - var _usedType = usedType || 'ENABLED'
+  if _usedType === 'LOAN'
+    | 散标
+  else if _usedType === 'LOAN_TRANSFER'
+    | 债转
+  else
+    | 红利计划

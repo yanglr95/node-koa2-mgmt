@@ -1,0 +1,39 @@
+thead
+  tr
+    th 提现ID
+    th.right.aligned 提现金额
+    th.right.aligned 银行账号
+    th.center.aligned 银行名称
+    th.right.aligned 单据状态
+    th 失败原因
+    th.center.aligned 申请时间
+    th.center.aligned 完成时间
+    th.center.aligned 提现来源
+    th.center.aligned 提现途径
+tbody
+  each val,idx in dataList
+    - var _loanStatus = UIHelper.parseLoanStatus(val.loanStatus)
+    tr
+      td #{val.cashDrawId}
+      td.right.aligned #{UIHelper.formatMoney(val.amount)}
+      td.right.aligned #{val.bank&&val.bank.cardId}
+      td.center.aligned #{val.bank&&val.bank.bankType}
+      td.right.aligned #{UIHelper.parseWithdrawStatus(val.cashDrawStatus)}
+      td #{val.logDesc}
+      td.center.aligned
+        if val.applyTime
+          | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.applyTime)}
+        else
+          |
+      td.center.aligned
+        if val.handleTime
+          | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.handleTime)}
+        else
+          |
+      td.center.aligned #{UIHelper.parseWithdrawType(val.drawCashType)}
+      td.center.aligned #{val.cashdrawChannel}
+
+tfoot
+  tr
+    th(colspan='10')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)

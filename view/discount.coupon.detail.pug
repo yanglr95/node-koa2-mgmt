@@ -1,0 +1,105 @@
+.ui.attached.segment
+  table.ui.celled.striped.table
+    tbody
+      tr
+        td.disabled 满减券名称
+        td #{discountDetail.batchName}
+        td.disabled 折扣金额
+        td
+          - var couponList = JSON.parse(discountDetail.valueJson)
+          each item, idx in couponList
+            | 满#{item.minCost}减#{item.value} | 
+      tr
+        td.disabled 运营文案
+        td #{discountDetail.tag}
+        td.disabled 批次的有效期
+        td 
+          +DiscountEffective(discountDetail.fixPeriod, discountDetail.expireTime)
+      tr
+        td.disabled 适用产品
+        td(colspan='5')
+          | 适用
+          +DiscountApply(discountDetail.allowBusinessCategory)
+      tr
+        td.disabled 发放方式
+        td(colspan='5')
+          +DiscountIssueType(discountDetail.issueStrategy)
+          if discountDetail.issueStrategy === 'AUTO'
+            | #{discountDetail.issueStrategyParam}
+  h3.ui.top.attached.block.header
+    | 满减券发放详情
+    - var _status = discountDetail.sendStatus
+    if _status == 'ERROR'
+      |  - 发放失败(#{discountDetail.errorMessage})
+    else if _status == 'RUNNING'
+      |  - 发放中
+    else if _status == 'SUCCESS'
+      |  - 发放成功
+    .ui.right.floated.sub.header
+      | 已领取：#{discountDetail.totalCount} 已使用：#{discountDetail.usedCount} 已折扣金额：#{UIHelper.formatNumber(discountDetail.dicountMoney, 2)}元
+      if dataList && dataList.length
+        .ui.mini.buttons
+          a.ui.blue.button(href='/discount/'+ query.id +'/'+ _currentNav +'/issue') 继续发放
+          .or
+          button.ui.button(type='submit' name='excel' value='excel') 导出
+  table(class='ui compact striped stackable celled table')
+    thead
+      tr
+        th 券ID
+        if discountDetail.issueStrategy === 'SERIAL'
+          th 兑换码
+        th.right.aligned 用户ID
+        th.right.aligned 用户姓名
+        th.right.aligned 领取时间
+        th.right.aligned 失效时间
+        th.right.aligned 优惠券状态
+        th.center.aligned 投资金额
+        th.right.aligned 折扣金额
+        th.right.aligned 投资产品
+        th.right.aligned 产品ID
+        th.right.aligned 投资时间
+        th.right.aligned 使用渠道
+    tbody
+      if dataList && dataList.length
+        each val,idx in dataList
+          - var _id = _.get(val, 'businessId') - 0
+          tr
+            td #{val.id}
+            if discountDetail.issueStrategy === 'SERIAL'
+              td #{val.serial}
+            td.right.aligned
+              a(href='/user/' + val.userId) #{val.userId}
+            td.right.aligned #{val.nickName}
+            td.right.aligned
+              if val.bindTime
+               | #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.bindTime)}
+            td.right.aligned
+              if val.expireTime
+               | #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.expireTime)}
+            td.right.aligned
+              if val.status
+                +DiscountStatus(val.status)
+            td.center.aligned
+              if val.investAmount
+                | #{UIHelper.formatNumber(val.investAmount, 2)}
+            td.right.aligned
+              if val.valueActual
+                | #{UIHelper.formatNumber(val.valueActual, 2)}
+            td.right.aligned
+              if val.businessCategory
+                +DiscountUsed(val.businessCategory)
+            td.right.aligned
+              if _id
+                a(href='/plan/' + _id) #{_id}
+            td.right.aligned
+              if val.consumeTime
+                | #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.consumeTime)}
+            td.right.aligned #{val.tradeMethod}
+        tfoot
+          tr
+            th(colspan='13')
+              +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      else
+        tr
+          td(colspan='13').ui.center.aligned
+            a(href='/discount/'+ query.id +'/'+ _currentNav +'/issue') 尚未发放优惠券，立即发放

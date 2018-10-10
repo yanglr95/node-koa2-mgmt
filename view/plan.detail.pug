@@ -1,0 +1,133 @@
+extends layout.pug
+
+block page-val
+  - var _query = entity || {}
+  - var _id = _query.id
+  - var pageTitle = '计划详情'
+  - var pageClass = 'page-plan-detail'
+  - var pageUrl = '/plan'
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/plan') 计划管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_plan-detail-form(class='ui stacked green segment form' method='POST')
+    h3.ui.dividing.header 修改计划运行参数
+    input(type='hidden' name='_csrf' value=csrf)
+    if !!(errors)
+      +Error(errors)
+    .ui.four.fields.required
+      .field
+        label 运营文案
+        input(type='text' name='tag' required value=_query.tag placeholder='运营文案' maxlength=8)
+    .ui.four.fields.required
+      .field
+        label 余额最小投资比例
+        .ui.right.labeled.input
+          input(type='text' name='minInvestRate' value=_query.minInvestRate
+            placeholder='余额最小投资比例' maxlength=2 required)
+          .ui.label %
+      .field
+        label 最小投资金额
+        .ui.right.labeled.input
+          input(type='text' name='minInvestAmount' value=_query.minInvestAmount
+            placeholder='最小投资金额' maxlength=20 required)
+          .ui.label 元
+      .field
+        label 单笔投资比例上限
+        .ui.right.labeled.input
+          input(type='text' name='maxInvestRate' value=_query.maxInvestRate placeholder='单笔投资比例上限' maxlength=20 required)
+          .ui.label %
+      .field
+    .fields.required
+      .eight.wide.field
+        label  投标利率限制
+        .two.fields
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanLowestRate' value=_query.loanLowestRate placeholder='投标利率下限' maxlength=6 required)
+              .ui.label %
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanHighestRate' value=_query.loanHighestRate placeholder='投标利率上限' maxlength=6 required)
+              .ui.label %
+      .eight.wide.field
+        label  投标期限限制
+        .two.fields
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanLowestPeriod' value=_query.loanLowestPeriod placeholder='投标期限下限' maxlength=2 required)
+              .ui.label 月
+          .field
+            .ui.right.labeled.input
+              input(type='text' name='loanHightestPeriod' value=_query.loanHightestPeriod placeholder='投标期限上限' maxlength=2 required)
+              .ui.label 月
+    .ui.buttons
+      button.ui.positive.button(type='submit') 保存修改
+    if updateSuccess
+      +Success().attached
+  .ui.segment
+    table.ui.celled.attached.striped.table
+      thead
+        tr
+          th(colspan=6) #{pageTitle}
+      tbody
+        tr
+          td.disabled 计划发布额度
+          td #{UIHelper.formatNumber(_query.amount)}
+          td.disabled 开始加入时间
+          td #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.beginSellingTime)}
+          td.disabled 发布时间
+          td #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.displayTime)}
+        tr
+          td.disabled 计划名称
+          td #{_query.name}
+          td.disabled 销售结束时间
+          td #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.endSellingTime)}
+          td.disabled 锁定期结束日
+          td #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.endLockingTime)}
+        tr
+          td.disabled #{_query.cashType == 'HXB'? '预期收益率（单利）': '预期收益率（复利）'}
+          td #{_query.compoundRate}%
+          td.disabled #{_query.cashType == 'HXB'? '基准利率（单利）': '基准利率（复利）'}
+          td #{_query.novice ? _query.compoundRate : _query.baseInterestRate}%
+          td.disabled 加息利率
+          td #{_query.novice ? 0 : _query.extraInterestRate}%
+        tr
+          td.disabled 运营文案
+          td #{_query.tag}
+          td.disabled 预期收益率（单利）
+          td #{_query.expectedRateUplan}%
+          td.disabled 产品期限
+          td #{_query.lockPeriod} #{_query.dateType=='DAY'? '天':'个月'}
+        tr
+          td.disabled 起投金额(可加入额度下限)
+          td #{UIHelper.formatNumber(_query.minRegisterAmount)}
+          td.disabled 递增金额(追加金额倍数)
+          td #{_query.appendMultipleAmount}
+          td.disabled 最大加入金额(可加入额度上限)
+          td #{_query.singleMaxRegisterAmount}
+        tr
+          td.disabled 申请天数
+          td #{_query.salePeriod}
+          td.disabled 提前退出费率
+          td #{_query.quitRateAdvance}%
+          td.disabled 收益处理方式
+          td #{UIHelper.parsePlanCashType(_query.cashType)}
+        tr
+          if _query.cashType == 'HXB'
+            td.disabled 计息日
+            td 每月#{_query.cashDrawDay}日
+          td.disabled 计划介绍
+          td #{_query.introduce}
+          td.disabled 计划类型
+          td #{_query.novice ? '新手计划':'常规红利计划'}
+          if _query.novice
+            td.disabled 贴息利率
+            td(colspan=3) #{_query.subsidyInterestRate}
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_plan-detail-form': !{JSON.stringify(errors)}});

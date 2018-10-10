@@ -1,0 +1,54 @@
+thead
+  tr
+    th
+    th 进件号
+    th 标的ID
+    th 用户ID
+    th 标题
+    th.right.aligned 合同借款金额
+    th.right.aligned 利率
+    th.right.aligned 期限
+    th.center.aligned 申请时间
+    th.center.aligned 结清时间
+    th.center.aligned 下载协议
+tbody
+  each val,idx in dataList
+    tr
+      td.collapsing
+        .ui.fitted.checkbox.J_item-checkbox
+          input(type='checkbox' name='ids' value=val.loanId data-extra={id:val.loanId})
+          label
+      td #{val.refId}
+      td #{val.loanId}
+      td
+        a(href='/user/'+val.userId target='_blank') #{val.userId}
+      td
+        a(href='/loan/'+val.loanId) #{val.title}
+      td.right.aligned #{UIHelper.formatMoney(val.amount)}
+      td.right.aligned #{val.interestRate}%
+      td.right.aligned #{val.months}个月
+      td.center.aligned
+        if val.applyTime
+          | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.applyTime)}
+        else
+          |  
+      td.center.aligned
+        if val.closeTime
+          | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.closeTime)}
+        else
+          |  
+      td.center.aligned
+        a(href='/loan/'+val.loanId+'/contract' title='下载协议') 下载协议
+tfoot
+  tr
+    th
+      //- 有批量操作
+      if batchList && batchList.length
+        .ui.fitted.checkbox.J_toggle-checkbox-button
+          input(type='checkbox' title='全选/反选')
+          label
+    th(colspan='10')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      //- 有批量操作
+      if batchList && batchList.length
+        +Batch(batchList)

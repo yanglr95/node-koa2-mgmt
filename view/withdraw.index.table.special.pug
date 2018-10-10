@@ -1,0 +1,41 @@
+thead
+  tr
+    th
+    th 提现ID
+    th 用户ID
+    th 姓名
+    th.right.aligned 提现金额
+    th.right.aligned 单据状态
+    th.center.aligned 申请时间
+    th.right.aligned 操作
+tbody
+  each val,idx in dataList
+    tr
+      td.collapsing
+        .ui.fitted.checkbox.J_item-checkbox
+          input(type='checkbox' name='ids' value=val.id data-extra={id:val.id})
+          label
+      td: a(href=pageUrl+'/'+val.id) #{val.id}
+      td: a(href='/user/'+val.userId target='_blank') #{val.userId}
+      td #{val.name}
+      td.right.aligned #{UIHelper.formatMoney(val.cashAmount)}
+      td.right.aligned #{val.viewStatus}
+      td.center.aligned
+        if val.submitDate
+          | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.submitDate)}
+        else
+          | 
+      td.right.aligned: a(href=pageUrl+'/'+val.id) 查看
+tfoot
+  tr
+    th
+      //- 有批量操作
+      if batchList && batchList.length
+        .ui.fitted.checkbox.J_toggle-checkbox-button
+          input(type='checkbox' title='全选/反选')
+          label
+    th(colspan='7')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      //- 有批量操作
+      if batchList && batchList.length
+        +Batch(batchList)

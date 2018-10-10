@@ -1,0 +1,11 @@
+mixin DiscountApply(value)
+  - var applyData = value.split(',')
+  each item, idx in applyData
+    if item === 'LOAN'
+      | 散标、
+    else if item === 'LOAN_TRANSFER'
+      | 债权转让、
+    else if item === 'FALL'
+      | 所有红利计划、
+    else
+      | 红利计划#{item.replace(/F/ig, '')}个月、

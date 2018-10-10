@@ -1,0 +1,26 @@
+mixin BatchMessage(data)
+  - var _batchTotal = _.get(batchResult, 'total', 0)
+  - var _batchSuccess = _.get(batchResult, 'success', 0)
+  - var _batchFail = _.get(batchResult, 'fail', 0)
+  - var _batchMsgs = _.get(batchResult, 'errMsg')
+  .ui.icon.message
+    i.warning.sign.icon
+    .content
+      .header 批量操作结果
+      .ui.labels
+        a.ui.label
+          | 总数
+          .detail #{_batchTotal}
+        a.ui.label.green
+          | 成功
+          .detail #{_batchSuccess}
+        a.ui.label.orange
+          | 失败
+          .detail #{_batchFail}
+      if _batchMsgs
+        ul.list.batch-error-list
+          if _.isObjectLike(_batchMsgs)
+            each v, k in _batchMsgs
+              li #{k}: #{v}
+          else
+            li #{_batchMsgs}

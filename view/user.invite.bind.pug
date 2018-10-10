@@ -1,0 +1,36 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.userId + '/statics'
+  - var _id = _.get(_query, 'userId')
+  - var pageTitle = '绑定用户'
+  - var pageClass = 'page-user-statis'
+  - var dataList = _.get(staticsData, 'dataList') || []
+  - var cashBackAmount = _.get(staticsData, 'cashBackAmount') - 0 || 0
+  - var directlyCashBackAmount = _.get(staticsData, 'directlyCashBackAmount') - 0 || 0
+  - var indirectCashBackAmount = _.get(staticsData, 'indirectCashBackAmount') - 0 || 0
+  - var selfCashBackAmount = _.get(staticsData, 'selfCashBackAmount') - 0 || 0
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.attached.segment
+    if success
+      +Success(_baseUrl)
+    else
+      form.ui.form(method='POST')
+        +Error(errors)
+        input(type='hidden' name='_csrf' value=csrf)
+        .field.required
+          label 用户ID
+          input(
+            type='text' name='inviteId' placeholder='' required value=_query.inviteId)
+        .ui.buttons
+          button.ui.positive.submit.button(type='submit') #{pageTitle}

@@ -1,0 +1,59 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.userId
+  - var _id = _.get(_query, 'userId')
+  - var _planid = _.get(_query, 'planId')
+  - var _name = {'plan':'计划持有明细','loan':'债权持有明细'}
+  - var pageTitle = '计划投标记录'
+  - var pageClass = 'page-user-asset'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle} #{_planid}
+  .ui.segment
+    if dataList && dataList.length
+      h3.ui.header #{pageTitle}
+      form.ui.form(method='POST')
+        input(type='hidden' name='action' value='query')
+        input(type='hidden' name='page' value=1)
+        input(type='hidden' name='_csrf' value=csrf)
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th 标的ID
+              th 标的
+              th.right.aligned 投标金额
+              th.right.aligned 标利率
+              th.center.aligned 投标时间
+              th.right.aligned 标类型
+              th.right.aligned 已获收益
+          tbody
+            each val,idx in dataList
+              - var _loanStatus = UIHelper.parseLoanStatus(val.status)
+              tr
+                td #{val.loanId}
+                td
+                  a(href='/loan/' +val.loanId) #{val.title}
+                td.right.aligned #{UIHelper.formatNumber(val.lendAmount)}
+                td.right.aligned #{val.interest}%
+                td.center.aligned
+                  if val.lendTime
+                    | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.lendTime)}
+                  else
+                    | 
+                td.right.aligned #{_loanStatus&&_loanStatus.name}
+                td.right.aligned #{UIHelper.formatMoney(val.hasEarnedInterest)}
+          tfoot
+            tr
+              th(colspan='7')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+    else
+      +Empty()

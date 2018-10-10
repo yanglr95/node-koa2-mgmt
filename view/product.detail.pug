@@ -1,0 +1,276 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/product'
+  - var _baseText = '产品管理'
+  - var _action = _query.id ? '修改':'添加'
+  - var _isEdit = _query.id ? true : false
+  - var _disableEdit = _isEdit
+  - var _inrepayServiceFeeDerate = _query.inrepayServiceFeeDerateJson ? JSON.parse(_query.inrepayServiceFeeDerateJson) : []
+  - var _monthlyMinInterest = _query.monthlyMinInterest ? JSON.parse(_query.monthlyMinInterest) : []
+  - var _creditInfoItems = _query.creditInfoItems ? _.map(_query.creditInfoItems.split(','), _.trim) : []
+  - var _channelList = channelList || []
+  - var _channel = _query.channel || {}
+  - var pageTitle = `${_action}产品`
+  - var pageClass = 'page-product-create-index'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) #{_baseText}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_product-create-form(class='ui stacked green segment form' method='POST')
+    input(type='hidden' name='_csrf' value=csrf)
+    //- 修改的时候禁止修改下面的字段，所以使用hidden的方式
+    if _disableEdit
+      input(type='hidden' name='productName' value=_query.productName)
+      input(type='hidden' name='protectType' value=_query.protectType)
+      input(type='hidden' name='cashDrawStrategy' value=_query.cashDrawStrategy)
+      input(type='hidden' name='loanType' value=_query.loanType)
+      input(type='hidden' name='channel' value=_channel.id)
+    .field.required
+      label 产品名称
+      input(type='text' name='productName' value=_query.productName placeholder='产品名称' title='产品名称' disabled=_disableEdit required)
+    .four.fields
+      .field.required
+        label 保障方式
+        select(name='protectType' title='保障方式' disabled=_disableEdit)
+          each val,idx in UIHelper.PRODCUT_INSURANCE
+            option(value=idx selected=idx==_query.protectType) #{val}
+      .field.required
+        label 放款模式
+        select(name='cashDrawStrategy' title='放款模式' disabled=_disableEdit)
+          each val,idx in UIHelper.PRODCUT_CASHDRAW_STRATEGY
+            option(value=idx selected=idx==_query.cashDrawStrategy) #{val}
+      .field.required
+        label 还款方式
+        select(name='loanType' title='还款方式' disabled=_disableEdit)
+          each val,idx in UIHelper.LOAN_TYPE
+            option(value=idx selected=idx==_query.loanType) #{val}
+      .field
+        label 所属渠道
+        select(name='channel' title='所属渠道' disabled=_disableEdit)
+          each val in _channelList
+            if val.status
+              option(value=val.id selected=val.id==_channel.id==_query.channel) #{val.utmsourceName}
+    .field
+      label 展现审核项目
+      .inline.fields
+        - var _hasDisplayScopeExtra = false
+        each val,idx in UIHelper.PRODCUT_DISPLAY_AUDIT
+          .field
+            .ui.checkbox
+              input(type='checkbox' name='creditInfoItems' checked=_.indexOf(_creditInfoItems, idx)!=-1 tabindex=0 value=idx)
+              label #{val}
+        each val,idx in _creditInfoItems
+          if !UIHelper.PRODCUT_DISPLAY_AUDIT[val]
+            - _hasDisplayScopeExtra = true
+            .field
+              input(type='text' name='creditInfoItemsExtra' value=val placeholder='自定义' title='自定义')
+        if !_hasDisplayScopeExtra
+          .field
+            input(type='text' name='creditInfoItemsExtra' value='' placeholder='自定义' title='自定义')
+    fieldset.field.J_fieldset
+      legend 借款期限
+      .J_fieldset-holder
+        each item,index in _monthlyMinInterest
+          .J_fieldset-item
+            .inline.fields
+              .field
+                label 期限
+                select.J_month(name="monthly")
+                  each val in _.range(1, 49)
+                    option(value=val selected=val==item.month) #{val}个月
+              .field
+                a(href='#' title='删除')
+                  i.red.delete.icon
+            .four.fields
+              .field
+                label 合同年利率
+                .ui.right.labeled.input
+                  input(type='text' name='fixInterest' value=item.fixInterest placeholder='合同年利率' title='合同年利率' required)
+                  .ui.label %
+              .field
+                label 结算年利率
+                .ui.right.labeled.input
+                  input(type='text' name='settleInterestRate' value=item.settleInterestRate placeholder='结算年利率' title='结算年利率' required)
+                  .ui.label %
+              .field
+                label 提前还款罚息
+                .ui.right.labeled.input
+                  input(type='text' name='inRepayPenalFee' value=item.inRepayPenalFee placeholder='提前还款罚息' title='提前还款罚息' required)
+                  .ui.label %
+            .four.fields
+              .field
+                label 逾期罚息
+                .ui.right.labeled.input
+                  input(type='text' name='overDueInterestRate' value=item.overDueInterestRate placeholder='逾期罚息' title='逾期罚息' required)
+                  .ui.label %
+              .field
+                label 逾期管理费
+                .ui.right.labeled.input
+                  input(type='text' name='overDueMgmtRate' value=item.overDueMgmtRate placeholder='逾期管理费' title='逾期管理费' required)
+                  .ui.label %
+              .field
+                label 严重逾期罚息
+                .ui.right.labeled.input
+                  input(type='text' name='badDebtInterestRate' value=item.badDebtInterestRate placeholder='严重逾期罚息' title='严重逾期罚息' required)
+                  .ui.label %
+              .field
+                label 严重逾期管理费
+                .ui.right.labeled.input
+                  input(type='text' name='badDebtMgmtRate' value=item.badDebtMgmtRate placeholder='严重逾期管理费' title='严重逾期管理费' required)
+                  .ui.label %
+        else
+          .J_fieldset-item
+            .inline.fields
+              .field
+                label 期限
+                select.J_month(name="monthly")
+                  each val in _.range(1, 49)
+                    option(value=val) #{val}个月
+              .field
+                a(href='#' title='删除')
+                  i.red.delete.icon
+            .four.fields
+              .field
+                label 合同年利率
+                .ui.right.labeled.input
+                  input(type='text' name='fixInterest' placeholder='合同年利率' title='合同年利率' required)
+                  .ui.label %
+              .field
+                label 结算年利率
+                .ui.right.labeled.input
+                  input(type='text' name='settleInterestRate' placeholder='结算年利率' title='结算年利率' required)
+                  .ui.label %
+              .field
+                label 提前还款罚息
+                .ui.right.labeled.input
+                  input(type='text' name='inRepayPenalFee' placeholder='提前还款罚息' title='提前还款罚息' required)
+                  .ui.label %
+              .field
+            .four.fields
+              .field
+                label 逾期罚息
+                .ui.right.labeled.input
+                  input(type='text' name='overDueInterestRate' placeholder='逾期罚息' title='逾期罚息' required)
+                  .ui.label %
+              .field
+                label 逾期管理费
+                .ui.right.labeled.input
+                  input(type='text' name='overDueMgmtRate' placeholder='逾期管理费' title='逾期管理费' required)
+                  .ui.label %
+              .field
+                label 严重逾期罚息
+                .ui.right.labeled.input
+                  input(type='text' name='badDebtInterestRate' placeholder='严重逾期罚息' title='严重逾期罚息' required)
+                  .ui.label %
+              .field
+                label 严重逾期管理费
+                .ui.right.labeled.input
+                  input(type='text' name='badDebtMgmtRate' placeholder='严重逾期管理费' title='严重逾期管理费' required)
+                  .ui.label %
+      button.ui.add.button(type='button') 添加
+    fieldset.field.J_fieldset
+      legend 提前还款退费
+      .inline.fields
+        label 状态
+        .field
+          .ui.radio.checkbox
+            input(type='radio' name='inrepayServiceFeeDerateEnabled' tabindex=-1 value='true' checked=!!_query.inrepayServiceFeeDerateEnabled)
+            label 启用
+        .field
+          .ui.radio.checkbox
+            input(type='radio' name='inrepayServiceFeeDerateEnabled' tabindex=-1 value='false' checked=!_query.inrepayServiceFeeDerateEnabled)
+            label 禁用
+      .J_fieldset-holder
+        each item,index in _inrepayServiceFeeDerate
+          .J_fieldset-item
+            .inline.fields
+              .field
+                label 期限
+                select(name="month")
+                  each val in _.range(1, 49)
+                    option(value=val selected=val==item.month) #{val}个月
+              .field
+                a(href='#' title='删除')
+                  i.red.delete.icon
+            .four.fields
+              .field
+                label 开始期数
+                input(type='text' name='startPeriod' value=item.startPeriod placeholder='开始期数' title='开始期数' required)
+              .field
+                label 结束期数
+                input(type='text' name='endPeriod' value=item.endPeriod  placeholder='结束期数' title='结束期数' required)
+              .field
+                label 退费比例
+                .ui.right.labeled.input
+                  input(type='text' name='derate' value=item.derate  placeholder='退费比例' title='退费比例' required)
+                  .ui.label %
+        else
+          .J_fieldset-item
+            .inline.fields
+              .field
+                label 期限
+                select(name="month")
+                  each val in _.range(1, 49)
+                    option(value=val) #{val}个月
+              .field
+                a(href='#' title='删除')
+                  i.red.delete.icon
+            .four.fields
+              .field
+                label 开始期数
+                input(type='text' name='startPeriod'
+                  placeholder='开始期数' title='开始期数'
+                  required
+                )
+              .field
+                label 结束期数
+                input(type='text' name='endPeriod' 
+                  placeholder='结束期数' title='结束期数' 
+                  required
+                )
+              .field
+                label 退费比例
+                .ui.right.labeled.input
+                  input(type='text' name='derate' placeholder='退费比例' title='退费比例' required)
+                  .ui.label %
+      button.ui.add.button(type='button') 添加
+    .four.fields
+      .field
+        label 风险等级
+        select(name='riskLevel')
+          each val,idx in UIHelper.PRODCUT_RISK_LEVEL
+            option(value=idx selected=idx==_query.riskLevel) #{val}
+      .field
+        label 合同模板
+        select(name='contractTemplateId')
+          option(value="1") 合同模板
+    .inline.fields
+      label 状态
+      .field
+        .ui.radio.checkbox
+          input(type='radio' name='status' checked=!!_query.status tabindex=0 value='true')
+          label 启用
+      .field
+        .ui.radio.checkbox
+          input(type='radio' name='status' checked=!_query.status tabindex=0 value='false')
+          label 禁用
+    .ui.center.aligned.basic.segment
+      .ui.buttons
+        button(class='ui positive button' type='submit') 保存
+        .or
+      button(class='ui button' type='reset') 重置
+    if !!(errors)
+      +Error(errors)
+
+block foot-script
+  script.
+    app.handler('productCreate')();
+  if !!(errors)
+    script.
+      app.formError({'#J_product-create-form': !{JSON.stringify(errors)}});

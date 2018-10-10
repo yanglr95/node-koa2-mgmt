@@ -1,0 +1,64 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/plan/count'
+  - var _nav = nav
+  - var pageUrl = '/plan/count'
+  - var pageTitle = navList[nav] && navList[nav].name
+  - var pageClass = 'page-plan-count'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/plan') 计划管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each val,k in navList
+      a.item(href=`${_baseUrl}/${k}`
+        title=val.name
+        class={'active':_nav==k}
+        ) #{val.name}
+  .ui.bottom.attached.segment
+    form.ui.form(method='POST')
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      if _nav == 'account' 
+        .ui.action.input
+          input(type='text' name='section' value=_query.section placeholder='大于该金额的账户' title='大于该金额的账户')
+          button.ui.primary.button(type='submit') 搜索
+      if _nav == 'quit'
+        .field
+          .six.wide.field.required
+            label 申请日期
+            .two.fields
+              .field
+                input.datetimepicker.datetimepicker-date(
+                  type='text' name='startTime' required maxlength='10'
+                  placeholder='下限' value=_query.startTime)#J_start-time
+              .field
+                input.datetimepicker.datetimepicker-date(
+                  type='text' name='endTime' required maxlength='10'
+                  placeholder='上限' value=_query.endTime)
+        button.ui.primary.button(type='submit') 搜索
+      if _nav == 'quit'
+        include ./plan.count.table.quit.pug
+      else
+        if dataList && dataList.length
+          table(class='ui compact striped celled table')
+            if _nav == 'account'
+              include ./plan.count.table.account.pug
+            else if _nav == 'total'
+              include ./plan.count.table.total.pug
+            else 
+              include ./plan.count.table.apply.pug
+        else
+          +Empty()
+block foot-script
+  script.
+    $('#J_start-time').datetimepicker({
+      minDate: Date.now()
+    })

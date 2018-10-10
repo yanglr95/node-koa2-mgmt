@@ -1,0 +1,167 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '计划后台参数'
+  - var pageClass = 'page-plan-setting'
+  - var _query = query || {}
+  - var pageUrl = '/plan/setting'
+
+block content
+  - var _uplanBidOrder = _query.uplanBidOrder || []
+  - var _uplanCreditor = _query.uplanCreditor || []
+  - var _loanOrder = _uplanBidOrder.length ? true : false
+  - var _planOrder = _uplanCreditor.length ? true : false
+  - var _options = {'NEWBIE':'新手','L':'长期','M':'中期','S':'短期'}
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/plan') 计划管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.info.message
+    .header 默认顺序
+    p 优先匹配新手计划，其他计划按资金需求紧急程度排序，不区分产品期限
+    .header 自定义
+    ul.list
+      li 短期: 由期限为4个月及以下的计划组成
+      li 中期: 由期限为5至11个月（含11个月）的计划组成
+      li 长期: 由期限为12个月及以上的计划组成
+      li 新手：新手专享计划
+  form#J_plan-setting-form(class='ui stacked green segment form' method='POST')
+    input(
+      type='hidden'
+      name='_csrf'
+      value=csrf
+    )
+    if !!(errors)
+      +Error(errors)
+    .fields.required
+      .ten.wide.field
+        label 散标投标优先级
+        .five.fields.J_order
+          .field
+            select.J_order-total(name='loanOrder')
+              option(value='' selected=!_loanOrder) 默认顺序
+              option(value='1' selected=_loanOrder) 自定义
+          .field
+            select.J_order-1(name='uplanBidOrder' disabled=_loanOrder)
+              - var _loanOrderOption = _uplanBidOrder && _uplanBidOrder.length && _uplanBidOrder[0] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+          .field
+            select.J_order-2(name='uplanBidOrder' disabled=_loanOrder)
+              - var _loanOrderOption = _uplanBidOrder && _uplanBidOrder.length && _uplanBidOrder[1] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+          .field
+            select.J_order-3(name='uplanBidOrder' disabled=_loanOrder)
+              - var _loanOrderOption = _uplanBidOrder && _uplanBidOrder.length && _uplanBidOrder[2] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+          .field
+            select.J_order-4(name='uplanBidOrder' disabled=_loanOrder)
+              - var _loanOrderOption = _uplanBidOrder && _uplanBidOrder.length && _uplanBidOrder[3] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+      .ten.wide.field
+        label 债权投标优先级
+        .five.fields.J_order
+          .field
+            select.J_order-total(name='planOrder')
+              option(value='' selected=!_planOrder) 默认顺序
+              option(value='1' selected=_planOrder) 自定义
+          .field
+            select.J_order-1(name='uplanCreditorOrder' disabled=_planOrder)
+              - var _loanOrderOption = _uplanCreditor && _uplanCreditor.length && _uplanCreditor[0] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+          .field
+            select.J_order-2(name='uplanCreditorOrder' disabled=_planOrder)
+              - var _loanOrderOption = _uplanCreditor && _uplanCreditor.length && _uplanCreditor[1] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+          .field
+            select.J_order-3(name='uplanCreditorOrder' disabled=_planOrder)
+              - var _loanOrderOption = _uplanCreditor && _uplanCreditor.length && _uplanCreditor[2] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+          .field
+            select.J_order-4(name='uplanCreditorOrder' disabled=_planOrder)
+              - var _loanOrderOption = _uplanCreditor && _uplanCreditor.length && _uplanCreditor[3] || ''
+              if _options[_loanOrderOption]
+                option(value=_loanOrderOption) #{_options[_loanOrderOption]}
+    .fields.required
+      .eight.wide.field
+        label 是否开启计划定期扫描前台标的
+        .inline.fields
+          .field
+            .ui.radio.checkbox
+              input(type='radio' name='uplanScannigLoan' tabindex='0' value='true'
+                checked=_query.uplanScannigLoan && _query.uplanScannigLoan=='true')
+              label 是
+          .field
+            .ui.radio.checkbox
+              input(type='radio' name='uplanScannigLoan' tabindex='0' value='false'
+                checked=_query.uplanScannigLoan && _query.uplanScannigLoan!='true')
+              label 否
+      .eight.wide.field
+        label 是否开启计划定期扫描散户转让债权
+        .inline.fields
+          .field
+            .ui.radio.checkbox
+              input(type='radio' name='financePlanBuyUserLoanTransfer' tabindex='0' value='true'
+                checked=_query.financePlanBuyUserLoanTransfer && _query.financePlanBuyUserLoanTransfer=='true')
+              label 是
+          .field
+            .ui.radio.checkbox
+              input(type='radio' name='financePlanBuyUserLoanTransfer' tabindex='0' value='false'
+                checked=_query.financePlanBuyUserLoanTransfer && _query.financePlanBuyUserLoanTransfer!='true')
+              label 否
+    .ui.equal.width.fields.required
+      .eight.wide.field
+        label 是否散户转让债权进入预售状态
+        .inline.fields
+          .field
+            .ui.radio.checkbox
+              input(type='radio' name='loanTransferPresell' tabindex='0' value='true'
+                checked=_query.loanTransferPresell && _query.loanTransferPresell=='true')
+              label 是
+          .field
+            .ui.radio.checkbox
+              input(type='radio' name='loanTransferPresell' tabindex='0' value='false'
+                checked=_query.loanTransferPresell && _query.loanTransferPresell!='true')
+              label 否
+      .eight.wide.field
+        label 散户转让债权_大于该利率进预售
+        .ui.right.labeled.input
+          input(type='text' name='limitRate' value=_query.limitRate required maxlength=4)
+          label.ui.label %
+    .ui.equal.width.fields.required
+      .field
+        label 计划退出放出到前台债权最大金额
+        .ui.right.labeled.input
+          input(
+            type='text' name='uplanQuitDebtMaxAmount'  maxlength=20
+            value=_query.uplanQuitDebtMaxAmount
+            placeholder='(整数，精确到元)金额进入前台债权转让页'
+            title='(整数，精确到元)金额进入前台债权转让页')
+          label.ui.label 元
+      .field
+        label 计划退出放出到前台债权最小利率（含）
+        .ui.right.labeled.input
+          input(type='text' name='uplanQuitDebtMinInterest' maxlength=4
+            value=_query.uplanQuitDebtMinInterest
+            placeholder='计划退出放出到前台债权最小利率（含）'
+            title='计划退出放出到前台债权最小利率（含）')
+          label.ui.label %
+    .ui.actions
+      button.ui.positive.button 保存
+    if updateSuccess
+      +Success().attached
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_plan-setting-form': !{JSON.stringify(errors)}});
+  script.
+    app.handler('planSetting')();

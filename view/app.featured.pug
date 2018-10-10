@@ -1,0 +1,105 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '首页推荐'
+  - var pageClass = 'page-app-featured'
+  - var _query = query || {};
+
+block content
+  .ui.breadcrumb
+    a.section(href='/app') APP
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_app-featured-form(class='ui stacked green segment form' method='POST')
+    if success
+      +Success().attached
+    if !!(errors)
+      +Error(errors)
+    table(class='ui celled structured table')
+      thead.center.aligned 
+        tr
+          th.collapsing 产品类型
+          th 期限
+          th 是否显示
+          th 新手推荐
+          th 红利计划排序
+          th 产品排序
+      tbody.center.aligned
+        - var _dataList = [3,6,9,12,24];
+        - var _len = _dataList.length
+        - var _perMonthList = [12]
+        - var _perLen = _perMonthList.length
+        each val,idx in _dataList 
+          - var _isVisible = _.get(_query, `plan.children[${val}].visible`)
+          - var _isRecommend = _.get(_query, `plan.children[${val}].recommend`)
+          - var _order = _.get(_query, `plan.children[${val}].order`, val)
+          - var _planOrder = _.get(_query, 'plan.order', defaultOrder)
+          tr
+            if idx ==0
+              td(rowspan=_len) 计划
+            td
+              input(type='hidden' name='months' value=val)
+              | #{val}月期
+            td
+              .ui.checkbox
+                input(type='checkbox' name='visible' value=val checked=_isVisible)
+                label 是否可见
+            td
+              .ui.checkbox
+                input(type='checkbox' name='recommend' value=val checked=_isRecommend)
+                label 是否推荐    
+            td
+              .ui.input
+                input.center.aligned(type='text' name='order' value=_order)
+            if idx ==0
+              td(rowspan=_len+_perLen)
+                .ui.input
+                  input.center.aligned(type='text' name='planOrder' value=_planOrder)
+        each val,idx in _perMonthList
+          - var _isVisible = _.get(_query, `plan_hxb.children[${val}].visible`)
+          - var _isRecommend = _.get(_query, `plan_hxb.children[${val}].recommend`)
+          - var _order = _.get(_query, `plan_hxb.children[${val}].order`, val)
+          tr
+            if idx ==0
+              td(rowspan=_perLen) 按月付息
+            td
+              input(type='hidden' name='perMonths' value=val)
+              | #{val}月期
+            td
+              .ui.checkbox
+                input(type='checkbox' name='perVisible' value=val checked=_isVisible)
+                label 是否可见
+            td
+              .ui.checkbox
+                input(type='checkbox' name='perRecommend' value=val checked=_isRecommend)
+                label 是否推荐    
+            td
+              .ui.input
+                input.center.aligned(type='text' name='perOrder' value=_order)
+        tr
+          td 标的
+          td --
+          td
+            .ui.checkbox
+              input(type='checkbox' name='loanVisible' value='1' checked=_.get(_query, 'loan.visible'))
+              label 是否可见
+          td
+            .ui.checkbox
+              input(type='checkbox' name='loanRecommend' value=val checked=_.get(_query, 'loan.recommend'))
+              label 是否推荐    
+          td --
+          td
+            .ui.input
+              input.center.aligned(type='text' name='loanOrder' value=_.get(_query, 'loan.order', defaultOrder))
+    .ui.center.aligned.basic.segment
+      .ui.buttons
+        button(class='ui positive button' type='submit') 保存
+        .or
+        button(class='ui button' type='reset') 重置
+    input(type='hidden' name='_csrf' value=csrf)
+
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_app-featured-form': !{JSON.stringify(errors)}});

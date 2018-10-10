@@ -1,0 +1,16 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '还款详情'
+  - var pageClass = 'page-repayment-detail'
+  - var _query = query || {}
+  - var _id = _query.id
+  - var _baseUrl = '/repayment/' + _id
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/repayment') 还款管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle} #{_id}

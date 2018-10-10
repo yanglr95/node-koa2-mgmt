@@ -1,0 +1,50 @@
+thead
+  tr
+    th
+    th 进件号
+    th 标的ID
+    th 用户ID
+    th.right.aligned 本期应还
+    th.center.aligned 成交日期
+    th.right.aligned 成交金额
+    th.right.aligned 借款期数
+    th.center.aligned 本期还款日期
+    th.right.aligned 本期期数
+    th.center.aligned 状态
+    th 操作
+tbody
+  each val,idx in dataList
+    - var _recordStatus = !!val.repayStatus
+    tr
+      td.collapsing
+        .ui.fitted.checkbox.J_item-checkbox
+          input(type='checkbox' name='ids' value=val.id data-extra={id:val.loanId})
+          label
+      td #{val.refId}
+      td
+        a(href='/loan/'+val.loanId target='_blank') #{val.loanId}
+      td
+        a(href='/user/'+val.userId) #{val.userId}
+      td.right.aligned #{UIHelper.formatMoney(val.monthAmount)}
+      td.center.aligned #{val.passTime}
+      td.right.aligned #{UIHelper.formatMoney(val.amount)}
+      td.right.aligned #{val.months}
+      td.center.aligned #{val.dueDate}
+      td.right.aligned #{val.periodNumber}
+      td.center.aligned #{!!val.repayStatus?'已添加':'未添加'}
+      td
+        a.mini.ui.blue.basic.button(href='/loan/'+val.loanId+'/lender' target='_blank') 债权人
+        button.mini.ui.red.basic.button(type='submit' name='stoploan' value= val.id) 终止借款
+tfoot
+  tr
+    th
+      //- 有批量操作
+      if batchList && batchList.length
+        .ui.fitted.checkbox.J_toggle-checkbox-button
+          input(type='checkbox' title='全选/反选')
+          label
+    th(colspan='11')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      //- 有批量操作
+      if batchList && batchList.length
+        +Batch(batchList)

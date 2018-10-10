@@ -1,0 +1,7 @@
+mixin Step(current, list)
+  each step in list
+    a.step(href=step.url class=current==step.key ?'active':'')
+      i.icon(class=step.icon)
+      .content
+        .title #{step.title}
+        .description #{step.sub||step.title}

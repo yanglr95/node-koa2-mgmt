@@ -1,0 +1,12 @@
+mixin DiscountStatus(status)
+  - var _status = status || 'ENABLED'
+  if _status === 'ENABLED'
+    | 生效中
+  else if _status === 'DISABLED'
+    | 已失效
+  else if _status === 'AVAILABLE'
+    | 未使用
+  else if _status === 'FROZEN'
+    | 冻结中
+  else if _status === 'USED'
+    | 已使用

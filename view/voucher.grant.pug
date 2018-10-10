@@ -1,0 +1,48 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var pageTitle = '卡券管理'
+  - var pageUrl = '/voucher/grant'
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href= pageUrl) #{pageTitle}
+  if success
+    .ui.positive.message
+      .header 操作成功!
+      p 
+        | 操作成功, 请勿刷新页面 
+        a(href= pageUrl) 继续发放卡券
+  else
+    .ui.segment
+      form#J_voucher-grant-form.ui.form(method='POST')
+        if !!(errors)
+          +Error(errors)
+        input(type='hidden' name='_csrf' value=csrf)
+        .two.fields
+          .field.required
+            label 用户手机号
+            input(type='text' name='phone' value=_query.phone  placeholder='用户手机号' minlength=11  maxlength=11 required)
+          .field.required
+            label 京东卡面额
+            select.ui.dropdown(name='value')
+              option(value='')  请选择
+              option(value='20' selected=_query.value && ( _query.value === '20')) 20
+              option(value='80' selected=_query.value && ( _query.value === '80')) 80
+              option(value='200' selected=_query.value && ( _query.value === '200')) 200
+              option(value='400' selected=_query.value && ( _query.value === '400')) 400
+              option(value='900' selected=_query.value && ( _query.value === '900')) 900
+        .two.fields
+          .field.required
+            label 短信内容
+            textarea(name='phoneMsg' placeholder='短信内容最多500字' maxlength=500 required) #{_query.phoneMsg}
+          .field.required
+            label 站内信内容
+            textarea(name='webMsg' placeholder='站内信内容最多500字' maxlength=500 required) #{_query.webMsg}
+        button.ui.green.button(type='submit') 发放
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_voucher-grant-form': !{JSON.stringify(errors)}});

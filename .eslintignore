@@ -1,0 +1,13 @@
+# /node_modules/* and /bower_components/* ignored by default
+
+# Ignore built files except build/index.js
+public/build/*
+public/dist/*
+public/lib/*
+public/semantic/*
+public/thirdparty/*
+public/umeditor/*
+public/js/editor/*
+config.example.js
+config.js
+gulpfile.js

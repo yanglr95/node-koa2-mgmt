@@ -1,0 +1,73 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var pageUrl = '/app/splash'
+  - var _action = _query.id ? '编辑':'添加'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/app') APP
+    i.right.angle.icon.divider
+    a.section(href=pageUrl)
+      if action === 'android'
+        | Android闪屏管理
+      if action === 'iphone'
+        | iPhone 闪屏管理
+      if action === 'iphoneX'
+        | iPhone X闪屏管理
+    i.right.angle.icon.divider
+    .active.section #{_action}
+  form#J_splash-form(class='ui stacked green segment form' method='POST')
+    .field.required
+      label 标题
+      input(type='text' name='title' value=_query.title required placeholder='名称'  title='名称')
+    .field.required
+        label 上传图片
+        input(type='text' name='image' value=_query.image placeholder='图片地址')
+        #J_splash-uploader.dropzone
+        span
+          if action === 'android'
+            | Android  1920*1080
+          if action === 'iphone'
+            | iPhone  1242px*2208px
+          if action === 'iphoneX'
+            | iPhone X  1125px*2436px
+    .fields.required
+      if action === 'iphone' || action === 'iphoneX'
+        .fields
+          .field.required
+            label IOS审核设置
+            select(class='' name='disabled')
+              option(value='1' selected=!_query.disabled) 开启
+              option(value='0' selected=_query.disabled) 关闭
+      .six.wide.field
+        label 生效时间段
+        .two.fields
+          .field
+            input.datetimepicker.datetimepicker-datetime(
+              type='text' name='start' placeholder='开始时间'
+              value=_query.start? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.start) : ''
+              )
+          .field
+            input.datetimepicker.datetimepicker-datetime(
+              type='text' name='end' placeholder='结束时间'
+              value=_query.end? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.end) : ''
+              )
+      .field
+        label 排序
+        input(type='text' name='order' value=_query.order || 99 placeholder='排序')
+    .ui.center.aligned.basic.segment
+      .ui.buttons
+        button(class='ui positive button' type='submit') 保存
+        .or
+        button(class='ui button' type='reset') 重置
+    input(type='hidden' name='_csrf' value=csrf)
+    if !!(errors)
+      +Error(errors)
+block foot-script
+  script.
+    app.handler('upload')({uploadHolder:'#J_splash-uploader',field:'image',act:'splash'});
+  if !!(errors)
+    script.
+      app.formError({'#J_splash-form': !{JSON.stringify(errors)}});

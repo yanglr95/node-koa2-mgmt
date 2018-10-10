@@ -1,0 +1,57 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = bankId ? '编辑银行' : '添加银行'
+  - var pageClass = 'bank-list-edit'
+  - var pageUrl = '/bank/list/edit'
+  - var _bankInfo = bankInfo
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/bank/list') 银行限额
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if success
+    +Success('/bank/list')
+  else
+    .ui.segment
+      if _bankInfo
+        - var _bankName = _.get(_bankInfo, 'bankName') || ''
+        - var _withholdPay = _.get(_bankInfo, 'quotaStatus') || ''
+        - var _bankCode = _.get(_bankInfo, 'bankCode') || 0
+        - var _bankSingleLimit = _.get(_bankInfo, 'perSumQuota') || 0
+        - var _bankDayLimit = _.get(_bankInfo, 'perDayQuota') || 0
+      form.ui.form(method='POST')
+        input(type='hidden' name='_csrf' value=csrf)
+        .inline.fields
+          .field.required
+            label 银行名称：
+            input(type='text' name='bankname' required value=_bankName ? _bankName : '' readonly=_bankName)
+        .inline.fields
+          .field
+            label 代扣支付：
+            select.ui.dropdown(name='withholdPay' value=_withholdPay ? _withholdPay : '0')
+              option(value='1' selected=(_withholdPay == '1')) 网易代扣
+              option(value='0' selected=(_withholdPay == '0')) 禁用
+              option(value='2' selected=(_withholdPay == '2')) 银行限额维护
+        .inline.fields
+          .field.required
+            label 银行代码：
+            input(type="text" name='bankcode' required value=_bankCode ? _bankCode : '')
+        .inline.fields
+          .field
+            label 代扣限额：
+            | 单笔：
+            input(type="text" name='single' value=_bankSingleLimit ? _bankSingleLimit : '') 
+          .field
+            | 单日：
+            input(type="text" name='day' value=_bankDayLimit ? _bankDayLimit : '') 
+        button.ui.green.button(type='submit') 确定
+      if !!(errors)
+        +Error(errors)
+
+          
+        
+

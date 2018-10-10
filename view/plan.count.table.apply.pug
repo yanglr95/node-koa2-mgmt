@@ -1,0 +1,15 @@
+thead.right.aligned 
+  tr
+    th.center.aligned 日期
+    th 3月期申请退出金额
+    th 6月期申请退出金额
+    th 12月期申请退出金额
+    th 24月期申请退出金额
+tbody.right.aligned
+  each val,idx in dataList
+    tr
+      td.center.aligned #{UIHelper.formatdate('YYYY-MM-DD', val.details['endLockingTime'])}
+      td #{val.details['3']}
+      td #{val.details['6']}
+      td #{val.details['12']}
+      td #{val.details['24']}

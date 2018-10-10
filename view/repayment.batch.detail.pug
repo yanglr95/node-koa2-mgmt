@@ -1,0 +1,109 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '还款批次详情'
+  - var pageClass = 'page-repayment-batch-detail'
+  - var _query = query || {}
+  - var _entity= entity || {}
+  - var _action = _query.action
+  - var _id = _query.id
+  - var _baseUrl = '/repayment/batch/' + _id
+  - var _status = _.get(_entity, 'auditStatus')
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/repayment') 还款管理
+    i.right.angle.icon.divider
+    a.section(href='/repayment/batch') 批次管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle} ##{_id}
+  .ui.segment
+    table.ui.celled.striped.table
+      thead
+        tr
+          th(colspan='4') #{pageTitle} ##{_id} / {#{UIHelper.parseRepayBatchAuditStatus(_entity.auditStatus)}}
+      tbody
+          tr
+            td 审批总笔数
+            td #{_entity.totalCount}
+            td 审批总金额
+            td #{UIHelper.formatMoney(_entity.totalAmount)}
+          tr
+            td 正常还款笔数
+            td #{_entity.commonCount}
+            td 正常还款金额
+            td #{UIHelper.formatMoney(_entity.commonAmount)}
+          tr
+            td 提前还款笔数
+            td #{_entity.inrepayCount}
+            td 提前还款金额
+            td #{UIHelper.formatMoney(_entity.inrepayAmount)}
+          tr
+            td 终止借款笔数
+            td #{_entity.endRepayCount - 0}
+            td 终止借款结算金额
+            td #{UIHelper.formatMoney(_entity.endRepayAmount)}
+          if _entity.cert
+            tr
+              td 转账凭证
+              td(colspan='3')
+                a(href=_entity.cert target='_blank') 查看凭证
+    if _status!=='WAITTING'
+      table.ui.celled.striped.table
+        thead
+          tr
+            th.collapsing 审核状态
+            th 备注
+            th.center.aligned 操作时间
+            th.collapsing 操作用户
+        tbody
+          tr
+            td #{UIHelper.parseRepayBatchAuditStatus(_entity.auditStatus)}
+            td #{_entity.remark}
+            td.center.aligned #{_entity.auditTime ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _entity.auditTime):''}
+            td #{_entity.staffName}
+  if success
+    +Success().attached
+  else if _status=='WAITTING' || !!(errors)
+    //- 
+      form#J_repayment-batch-cancel-form.ui.red.segment.form(method='POST')
+        h4.ui.dividing.header 撤销审批
+        input(type='hidden' name='action' value='cancel')
+        input(type='hidden' name='_csrf' value=csrf)
+        if !!(errors) && action == 'cancel'
+          +Error(errors)
+        button.ui.red.submit.button(type='submit') 撤销审批
+    form#J_repayment-batch-detail-form.ui.segment.form(method='POST')
+      h4.ui.dividing.header 审批申请
+      input(type='hidden' name='_csrf' value=csrf)
+      if !!(errors) && action != 'cancel'
+        +Error(errors)
+      .field.required
+        label 备注内容
+        textarea(name='remark' placeholder='备注内容最多500字' maxlength=500 required) #{_query.remark}
+      .field
+        label 到账凭证
+        input(type='text' name='fileUpload' value=_query.fileUpload readOnly)
+        #J_repayment-batch-uploader.dropzone
+      .field.ui.action.input
+        .ui.selection.dropdown
+          input(type='hidden' name='action' value='')
+          i.dropdown.icon
+          .default.text 选择操作
+          .menu
+            each item in [{k:'pass',v:'审批通过'},{k:'reject',v:'审批驳回'}]
+              .item(data-value=item.k) #{item.v}
+        button.ui.button(type='submit') 应用操作
+
+block foot-script
+  script.
+    app.handler('upload')({uploadHolder:'#J_repayment-batch-uploader',field:'fileUpload',act:'cert'});
+  if !!(errors)
+    if action=='cancel'
+      script.
+        app.formError({'#J_repayment-batch-cancel-form': !{JSON.stringify(errors)}});
+    else
+      script.
+        app.formError({'#J_repayment-batch-detail-form': !{JSON.stringify(errors)}});

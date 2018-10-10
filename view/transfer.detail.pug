@@ -1,0 +1,73 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '债转详情'
+  - var pageClass = 'page-transfer-detail'
+  - var _query = query || {}
+  - var _baseUrl = '/transfer/' + _query.id
+  - var _entity = entity || {}
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/transfer') 债权转让
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    h3.ui.header 债转详情
+    table.ui.celled.striped.table
+      tbody
+        tr
+          td.disabled 转出金额
+          td #{UIHelper.formatMoney(_entity.transferedAmout)}
+          td.disabled 手续费
+          td #{UIHelper.formatMoney(_entity.serviceFee)}
+          td.disabled
+          td
+        tr
+          td.disabled 待转让金额
+          td #{UIHelper.formatMoney(_entity.leftTransAmount)}
+          td.disabled 待收本金
+          td #{UIHelper.formatMoney(_entity.leftTransPrincipal)}
+          td.disabled 应允利息
+          td #{UIHelper.formatMoney(_entity.leftTransInterest)}
+        tr
+          td.disabled 初始转让金额
+          td #{UIHelper.formatMoney(_entity.initTransAmount)}
+          td.disabled 开始转让时间
+          td #{_entity.transferTime ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _entity.transferTime) : ''}
+          td.disabled 完成转让时间
+          td #{_entity.transferFinishTime ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _entity.transferFinishTime) : ''}
+  form.ui.segment.form(method='POST')
+    h3.ui.header 转让记录
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    if dataList && dataList.length
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th 转出人ID
+            th 受让人ID
+            th.right.aligned 成交金额
+            th.right.aligned 本金
+            th.right.aligned 公允利息
+            th.right.aligned 手续费
+            th.center.aligned 交易时间
+            th.center.aligned 合同
+        tbody
+          each val,idx in dataList
+            tr
+              td
+                a(href='/user/'+val.fromUserId target='_blank') #{val.fromUserId}
+              td
+                a(href='/user/'+val.toUserId target='_blank') #{val.toUserId}
+              td.right.aligned #{UIHelper.formatMoney(val.amount)}
+              td.right.aligned #{UIHelper.formatMoney(val.principal)}
+              td.right.aligned #{UIHelper.formatMoney(val.interest)}
+              td.right.aligned #{UIHelper.formatMoney(val.fee)}
+              td.center.aligned #{val.createTime ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.createTime) : ''}
+              td.center.aligned 合同
+    else
+      +Empty()

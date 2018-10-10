@@ -1,0 +1,98 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '好友邀请'
+  - var pageClass = 'page-cashback-count'
+  - var _query = query || {}
+  - var pageUrl = '/cashback'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.attached.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .fields
+        .six.wide.field
+          label 统计日期
+          .two.fields
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='startTime' maxlength='10'
+                placeholder='开始' value=_query.startTime)
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='endTime' maxlength='10'
+                placeholder='结束' value=_query.endTime)
+        .eight.wide.field
+          label 搜索
+          .three.fields
+            .field
+              input(type='text' name='searchVal' maxlength='20' placeholder='搜索关键字' value=_query.searchVal)
+            .field.ui.selection.dropdown.attached
+              input(type='hidden' name='searchName' value=_query.searchName)
+              i.dropdown.icon
+              .default.text 搜索字段
+              .menu
+                - var _list = [{k:'investUserId',v:'投资用户ID'},{k:'inviterUserId',v:'邀请人ID'}]
+                each item in _list
+                  .item(data-value=item.k) #{item.v}
+            .field
+              button.ui.attached.primary.button(type='submit') 搜索
+      h3.ui.top.attached.block.header
+        | #{pageTitle}
+        .ui.right.floated.sub.header
+          | 返现账户剩余金额：#{UIHelper.formatNumber(cashbackAccount, 2)}元 累计发放金额：#{UIHelper.formatNumber(historyBackAmount, 2)}元
+          .ui.mini.buttons
+            a.ui.blue.button(href='/cashback/ratio') 返现比例
+      if dataList && dataList.length
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th 投资用户ID
+              th 投资金额
+              th 投资产品
+              th 自返现金额
+              th.right.aligned 一级邀请人
+              th.right.aligned 返现金额
+              th.center.aligned 二级邀请人
+              th.center.aligned 返现金额
+              th.center.aligned 三级邀请人
+              th.center.aligned 返现金额
+              th.center.aligned 返现时间
+          tbody
+            each val,idx in dataList
+              tr
+                td
+                  a(href='/user/' + val.investUserId) #{val.investUserId}
+                td #{UIHelper.formatNumber(val.invitedAmount, 2)}
+                td #{val.product}
+                td
+                  if val.selfBackAmount
+                    | #{UIHelper.formatNumber(val.selfBackAmount, 2)}
+                td 
+                  a(href='/user/' + val.userIdLevel1) #{val.userIdLevel1}
+                td
+                  if val.level1BackAmount
+                    | #{UIHelper.formatNumber(val.level1BackAmount, 2)}
+                td
+                  a(href='/user/' + val.userIdLevel2) #{val.userIdLevel2}
+                td
+                  if val.level2BackAmount
+                    | #{UIHelper.formatNumber(val.level2BackAmount, 2)}
+                td
+                  a(href='/user/' + val.userIdLevel3) #{val.userIdLevel3}
+                td
+                  if val.level3BackAmount
+                    | #{UIHelper.formatNumber(val.level3BackAmount, 2)}
+                td #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.backTime)}
+          tfoot
+            tr
+              th(colspan='13')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      else
+        +Empty()        

@@ -1,0 +1,63 @@
+- var _issueType = issueType || 'AUTO'
+if _issueType == 'AUTO'
+  .field
+    label 发放方式：
+    .inline 自动发放
+  .field
+    label 发放代码：
+    .ui.selection.dropdown
+      input(type='hidden' name='autoType' value=_query.autoType)
+      i.dropdown.icon
+      .default.text 所有类型
+      .menu
+        each item in _issueAutoType
+          .item(data-value=item.releaseType) #{item.releaseDesc}
+  .field
+    label 最大发放张数：
+    input(
+      type='text' name='maxQuantity' placeholder='' value=_query.maxQuantity)        
+else if _issueType == 'MANUAL'
+  .field
+    label 发放方式
+    .inline 手动发放
+  .field
+    .ui.four.inline.fields
+      label 选择优惠券及用户
+    .inline.fields
+      each item, idx in _issueList
+        .field
+          .ui.checkbox
+            input(type='checkbox' name='types' tabindex='0' value=idx + 1).hidden
+            label #{item.discountRate}%抵扣率
+  .field.inline
+    .field
+      .ui.radio.checkbox
+        input(type='radio' name='issueType' tabindex='0' value='SINGLE' checked).hidden
+        label 手动输入发放
+    .field
+      input(type='text' name='issueUserId' placeholder='输入用户ID发放' value=)
+  .field.inline
+    .field
+      .inline
+        .ui.radio.checkbox
+          input(type='radio' name='issueType' tabindex='0' value='IMPORT').hidden
+          label.checkbox_title 上传用户ID发放
+        a(download='用户表模板.xlsx' target='_blank' href= _url_user_tpl) (下载用户模板)
+      input(type='text' name='file' value=_query.file placeholder='上传文件地址')
+      #J_filer-uploader.dropzone
+else if _issueType == 'SERIAL'
+  .field
+    label 发放方式
+    .inline 兑换码发放
+  .field
+    label 选择优惠券及用户
+    .inline.fields
+      each item, idx in _issueList
+        .field
+          .ui.checkbox
+            input(type='checkbox' name='types' tabindex='0' value=idx + 1).hidden
+            label #{item.discountRate}%抵扣率
+  .ui.four.inline.fields
+    .field
+      label 发放数量
+      input(type='text' name='count' placeholder='' value=)

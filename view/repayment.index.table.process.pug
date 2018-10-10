@@ -1,0 +1,56 @@
+thead
+  tr
+    th
+    th 标的ID
+    th 进件号
+    th 真实姓名
+    th.center.aligned 成交时间
+    th.right.aligned  成交金额
+    th.right.aligned  总期数
+    th.center.aligned 还款日期
+    th.right.aligned  本期期数
+    th.right.aligned  合同利率
+    th 还款类型
+    th.right.aligned  应还总金额
+    th.right.aligned  结算金额
+    th.right.aligned  总返还服务费
+    th 批次ID
+    th 状态
+tbody
+  each val,idx in dataList
+    tr
+      td
+        .ui.fitted.checkbox.J_item-checkbox
+          input(type='checkbox' name='ids' value=val.batchId data-extra={id:val.batchId})
+          label
+      td
+        a(href='/loan/'+val.loanId target='_blank') #{val.loanId}
+      td #{val.refId}
+      td
+        a(href='/user/'+val.userId target='_blank') #{val.realName}
+      td.center.aligned #{UIHelper.formatdate('YYYY-MM-DD',val.passTime)}
+      td.right.aligned  #{UIHelper.formatMoney(val.amount)}
+      td.right.aligned  #{val.months}
+      td.center.aligned #{UIHelper.formatdate('YYYY-MM-DD',val.dueDate)}
+      td.right.aligned  #{val.periodNumber}
+      td.right.aligned  #{val.interest}
+      td #{UIHelper.parseLoanRepaidType(val.repayType)}
+      td.right.aligned  #{UIHelper.formatMoney(val.repayAmount)}
+      td.right.aligned  #{UIHelper.formatMoney(val.balanceAmount)}
+      td.right.aligned  #{UIHelper.formatMoney(val.balanceAmountDiff)}
+      td
+        a(href='/repayment/batch/'+ val.workFlowId) #{val.workFlowId}
+      td  #{UIHelper.parseRepayBatchStatus(val.repayStatus)}
+tfoot
+  tr
+    th
+      //- 有批量操作
+      if batchList && batchList.length
+        .ui.fitted.checkbox.J_toggle-checkbox-button
+          input(type='checkbox' title='全选/反选')
+          label
+    th(colspan='15')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      //- 有批量操作
+      if batchList && batchList.length
+        +Batch(batchList)

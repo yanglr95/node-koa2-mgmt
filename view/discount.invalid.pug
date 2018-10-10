@@ -1,0 +1,29 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '作废'
+  - var _currentNav = stepCurrent
+  - var _baseUrl = '/discount/' + stepCurrent
+  - var headerTitle = _currentNav === 'deduction' ? '优惠券' : '满减券'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each step in stepList
+      a.item(href=step.url title=step.sub class={active:_currentNav==step.key}) #{step.title}  
+  h3.ui.attached.header #{headerTitle}#{pageTitle}
+  .ui.attached.segment
+    if success
+      +Success(_baseUrl)
+    else
+      form#J_user-forbid-form(method='POST' class='ui form')
+        +Error(errors)
+        input(type='hidden' name='_csrf' value=csrf)
+        if _isAvailable
+          input(type='hidden' name='action' value='forbid')
+        else
+          input(type='hidden' name='action' value='allow')
+        button.ui.positive.submit.button(type='submit') #{pageTitle}

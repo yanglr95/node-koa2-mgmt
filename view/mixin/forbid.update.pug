@@ -1,0 +1,28 @@
+mixin ForbidUpdate(forbidInfo, type)
+  - var _forbidEnabled = _.get(forbidInfo, 'enabled')
+  - var _forbidEnabledTime = _.get(forbidInfo, 'enabledTime')
+  - var _forbidStartTime = _.get(forbidInfo, 'startTime')
+  - var _forbidFinishTime = _.get(forbidInfo, 'finishTime')
+  .field
+    .ui.radio.checkbox.J_start-btn
+      input(type='radio', name=type+'Switch', value='false', checked=!forbidInfo || !_forbidEnabled)
+      label 启用
+  .field
+    .ui.radio.checkbox.J_forbid-btn
+      input(type='radio', name=type+'Switch', value='true', checked=forbidInfo && _forbidEnabled)
+      label 禁用
+  if forbidInfo && !_forbidEnabled
+    .field.J_text-switch(data-state=1)
+      .ui.input 启用时间：#{UIHelper.formatdate('YYYY-MM-DD HH:mm', _forbidEnabledTime)}
+  else if _forbidEnabled
+    .field.J_text-switch(data-state=0)
+      .ui.input 禁用时间：#{UIHelper.formatdate('YYYY-MM-DD HH:mm',_forbidStartTime)}，禁用至#{UIHelper.formatdate('YYYY-MM-DD HH:mm', _forbidFinishTime)}
+  if !forbidInfo || !_forbidEnabled
+    .field.required
+      .ui.input
+        input.J_forbid-time(type='text', placeholder='设置封禁时长', name=type+'Time', disabled=!forbidInfo || !_forbidEnabled, required)
+    .field
+      select.ui.fluid.search.dropdown.J_forbid-while(class=(!forbidInfo || !_forbidEnabled)?'disabled':'', name=type+'While')
+        option(value='D') 日
+        option(value='M') 月
+        option(value='Y') 年

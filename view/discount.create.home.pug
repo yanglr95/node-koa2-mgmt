@@ -1,0 +1,33 @@
+extends layout.pug
+
+block page-val
+  - var _currentNav = stepCurrent
+  - var pageTitle = _currentNav === 'deduction' ? '优惠券' : '满减券'
+  - var _query = query || {}
+
+block content
+  - var _url = _currentNav === 'deduction' ? '/discount/deduction' : '/discount/coupon'
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href= _url) #{pageTitle}
+    i.right.angle.icon.divider
+    .section.active 新建
+  form(class='ui stacked green segment form' method='POST')#J_create-discount
+    h3.ui.header #{_currentNav === 'deduction' ? '新建抵扣券' : '新建满减券'}
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    if !!(errors)
+      +Error(errors)
+    if _currentNav == 'deduction'
+      include discount.deduction.create.pug
+    else if _currentNav == 'coupon'
+      include discount.coupon.create.pug
+
+block foot-script
+  script.
+    app.handler('productCreate')();
+  if !!(errors)
+    script.
+      app.formError({'#J_create-discount': !{JSON.stringify(errors)}});

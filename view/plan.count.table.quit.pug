@@ -1,0 +1,40 @@
+if totalList && totalList.length
+  - var _total = totalSum
+  - var _monthList = totalList.reduce((sum, v)=>{if(v.month){sum.push(v.month)} return sum;}, [])
+  - var _columnCount
+  table(class='ui compact striped celled table')
+    thead.right.aligned 
+      tr
+        th.center.aligned 计划退出总额
+        each item,index in totalList
+          - var _month = item.month
+          if _month
+            th #{_month}个月计划退出总额
+    tbody.right.aligned 
+      tr
+        td.center.aligned #{_total}
+        each item,index in totalList
+          - _columnCount = index
+          if item.month
+            td #{item.amount}
+if dataList && dataList.length
+  - var _columnCount
+  table(class='ui compact striped celled table')
+    thead.right.aligned 
+      tr
+        th.center.aligned 日期
+        each item,index in _monthList
+          - _columnCount = index
+          th #{item}个月退出金额
+    tbody.right.aligned 
+      each val,idx in dataList
+        tr
+          td.center.aligned
+            if val.createTime
+              | #{UIHelper.formatdate('YYYY-MM-DD', val.createTime)}
+          each item,idx in _monthList
+            td #{val[item]}
+    tfoot
+      tr
+        th(colspan=2+_columnCount)
+          +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)

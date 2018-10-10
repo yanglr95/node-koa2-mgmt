@@ -1,0 +1,25 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _id = _.get(_query, 'id')
+  - var pageTitle = '启用用户'
+  
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href='/user/forbid/list') 封禁列表
+    i.right.angle.icon.divider
+    .section.active 启用用户#{_id}
+
+  .ui.positive.attached.message 
+    form(method='post').ui.segment
+      input(type='hidden' name='_csrf' value=csrf)
+      .content 
+        .header 确定启用用户#{_id}?
+        .ui.hidden.divider
+        p
+          button(type='submit', name='action', value='starting').ui.primary.button 确定

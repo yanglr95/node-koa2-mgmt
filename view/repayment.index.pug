@@ -1,0 +1,68 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '还款管理'
+  - var pageClass = 'page-repayment-index'
+  - var pageUrl = '/repayment'
+  - var _currentNav = stepCurrent
+  - var _query = query || {}
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each step in stepList
+      a.item(href=step.url title=step.sub class={active:stepCurrent==step.key}) #{step.title}
+  form.ui.attached.segment.form(method='POST')
+    h4.ui.dividing.header 搜索条件
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    - var _repayStatusList = [{k:'',v:'全部状态'},{k:'UNPROCESS',v:'未操作'},{k:'WAIT_AUDIT',v:'等待审批'},{k:'AUDIT_REJECT',v:'审批驳回'},{k:'CANCEL',v:'撤销'}]
+    - var _repayTypeList = [{k:'',v:'全部类型'},{k:'COMMON_REPAY',v:'正常还款'},{k:'IN_REPAY',v:'提前还款'},{k:'END_REPAY',v:'终止借款'}]
+    if _currentNav=='process'
+      - var _repayStatusList = [{k:'',v:'全部状态'},{k:'PROCESSING',v:'处理中'},{k:'RECHARGE_FAILURE',v:'充值失败'},{k:'REPAY_FAILURE',v:'还款失败'},{k:'AUDIT_PASS',v:'审批通过'}]
+    .equal.width.fields
+      .field
+        label 状态
+        .ui.selection.dropdown
+          input(type='hidden' name='repayStatus' value=_query.repayStatus)
+          i.dropdown.icon
+          .default.text 全部状态
+          .menu
+            each item in _repayStatusList
+              .item(data-value=item.k) #{item.v}
+      .field
+        label 类型
+        .ui.selection.dropdown
+          input(type='hidden' name='repayType' value=_query.repayType)
+          i.dropdown.icon
+          .default.text 全部类型
+          .menu
+            each item in _repayTypeList
+              .item(data-value=item.k) #{item.v}
+    .ui.action.input.four.wide.field
+      input(type='text' name='searchVal' maxlength='20'
+        placeholder='搜索关键字' value=_query.searchVal)
+      .ui.selection.dropdown
+        input(type='hidden' name='searchName' value=_query.searchName)
+        i.dropdown.icon
+        .default.text 搜索字段
+        .menu
+          - var _list = [{k:'refId',v:'进件号'},{k:'userId',v:'用户ID'},{k:'username',v:'用户名'},{k:'realName',v:'真实姓名'},{k:'mobile',v:'手机号'},{k:'utmSource',v:'渠道'},{k:'loanId',v:'标的ID'},{k:'workFlowId',v:'批次Id'}]
+          each item in _list
+            .item(data-value=item.k) #{item.v}
+      button.ui.primary.button(type='submit') 搜索
+    if batch && batchResult
+      +BatchMessage(batchResult)
+    if dataList && dataList.length
+      h4.ui.dividing.header 搜索结果
+      table(class='ui compact striped celled table')
+        if _currentNav == 'new'
+          include ./repayment.index.table.new.pug
+        else if _currentNav == 'process'
+          include ./repayment.index.table.process.pug
+    else
+      +Empty()

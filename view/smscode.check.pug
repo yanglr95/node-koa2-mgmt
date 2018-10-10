@@ -1,0 +1,38 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '验证码查询'
+  
+block content
+  - var _query = query || {}
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .ui.wide.field
+        label 用户手机号
+        .ui.action.input.four.wide.field
+          input(type='text' name='mobile' maxlength='11' placeholder='搜索关键字' value=_query.mobile)
+          button.ui.attached.primary.button(type='submit') 搜索
+      .ui.wide.field    
+        span *仅支持查询注册验证码
+      if dataList && dataList.length
+        h4.ui.dividing.header 搜索结果
+        table(class='ui compact striped celled table') 
+          thead
+            tr
+              th 验证码
+              th 发送时间
+          tbody
+            each item, idx in dataList
+              tr
+                td #{item.validCode}
+                td #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', item.sendTime - 0)}

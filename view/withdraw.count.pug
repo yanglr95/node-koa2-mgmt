@@ -1,0 +1,73 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '提现统计'
+  - var pageClass = 'page-withdraw-count'
+  - var pageUrl = '/withdraw/count'
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/withdraw'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/withdraw') 提现管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 统计条件
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .fields
+        .six.wide.field
+          label 日期
+          .two.fields
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='startDate' maxlength='10'
+                placeholder='下限' value=_query.startDate)
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='endDate' maxlength='10'
+                placeholder='上限' value=_query.endDate)
+      button.ui.attached.primary.button(type='submit') 统计
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th(colspan='2') 手续费
+        tbody
+          tr
+            td.collapsing.disabled 扣除用户提现手续费
+            td #{UIHelper.formatNumber(_entity.cashDrawFee)}
+      if dataList && dataList.length
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th 通道
+              th 银行名称
+              th 提交金额
+              th 提交笔数
+              th 成功金额
+              th 成功笔数
+              th 失败金额
+              th 失败笔数
+              th 退票金额
+              th 退票笔数
+          tbody
+            each val in dataList
+              tr
+                td #{val.payName}
+                td #{val.bankName}
+                td #{UIHelper.formatMoney(val.applyAmount)}
+                td #{val.applyCount}
+                td #{UIHelper.formatMoney(val.successAmount)}
+                td #{val.successCount}
+                td #{UIHelper.formatMoney(val.failedAmount)}
+                td #{val.failedCount}
+                td #{UIHelper.formatMoney(val.refundAmount)}
+                td #{val.refundCount}
+      else
+        +Empty()

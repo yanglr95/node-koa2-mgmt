@@ -1,0 +1,56 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '加息活动'
+  - var pageClass = 'page-app-raise-index'
+  - var pageUrl = '/app/raise'
+  - var _query = query || {}
+  - var _action = _query.id ? '编辑':'添加'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/app') APP
+    i.right.angle.icon.divider
+    a.section(href=pageUrl) #{pageTitle}
+    i.right.angle.icon.divider
+    .active.section #{_action}
+  form#J_raise-form(class='ui stacked green segment form' method='POST')
+    .fields
+      .six.wide.field
+        label 生效时间段
+        .two.fields
+          .field
+            input.datetimepicker.datetimepicker-datetime(
+              type='text' name='start' placeholder='开始时间'
+              value=_query.start? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.start) : ''
+              )
+          .field
+            input.datetimepicker.datetimepicker-datetime(
+              type='text' name='end' placeholder='结束时间'
+              value=_query.end? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.end) : ''
+              )
+    each row in [0,1,2]
+      .three.fields
+        each col in [0,1,2]
+          - var _index = (row * 3) + col
+          - var _order = _index + 1
+          - var _productId = _.get(query, `dataList[${_index}]`, '')
+          .field
+            label 产品#{_order}
+            input(
+              type='number' name='ids' placeholder='产品'+_order
+              value=_productId
+            )
+    input(type='hidden' name='_csrf' value=csrf)
+    .ui.center.aligned.basic.segment
+      .ui.buttons
+        button(class='ui positive button' type='submit') 保存
+        .or
+        button(class='ui button' type='reset') 重置
+    if !!(errors)
+      +Error(errors)
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_raise-form': !{JSON.stringify(errors)}});

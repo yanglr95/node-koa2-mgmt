@@ -1,0 +1,113 @@
+.three.fields
+  .field.required
+    label 满减券名称
+    input(
+      type='text' name='batchName' placeholder='' required value=_query.batchName)
+  .field
+    label 满减券文案(最长只能设置6个字文案)
+    input(type='text' name='tag' maxlength='6' placeholder='' value=_query.tag)
+.grouped.fields
+  label(for="validity") 有效期
+  .field(style='padding: 30px 0;')
+    .ui.grid
+      .two.wide.colunm
+        .ui.radio.checkbox
+          input(type='radio' name='validity' value='expireTime' tabindex='0' checked).hidden
+          label
+      .fourteen.wide.colunm
+        .inline.fields
+          .six.wide.field
+            input.datetimepicker.datetimepicker-date(
+              type='text' name='expireTime' maxlength='10'
+              placeholder='选择失效时间' value=_query.expireTime)
+          .ten.wide.field 选择此项时，默认发布即生效
+  .field
+    .ui.grid
+      .two.wide.colunm
+        .ui.radio.checkbox
+          input(type='radio' name='validity' value='fixPeriod' tabindex='0').hidden
+          label
+      .fourteen.wide.colunm
+        .inline.fields
+          .three.wide.field
+            input(type='text' name='fixPeriod' placeholder='' value=_query.fixPeriod)
+          .three.wide.field
+            select.ui.fluid.search.dropdown(name='fixPeriodType')
+              option(value='D') 天
+              option(value='M') 月
+              option(value='Y') 年
+          .ten.wide.field 选择此项时，按用户领到优惠券的时间开始生效
+.field
+  label 适用产品
+  .inline.fields
+    .one.wide.field
+      .ui.checkbox
+        if _query.loanIssueCategory
+          input(type='checkbox' name='loanIssueCategory' value='LOAN' checked disabled).hidden
+        else
+          input(type='checkbox' name='loanIssueCategory' value='LOAN' disabled).hidden
+        label 散标
+    .one.wide.field
+      .ui.checkbox
+        if _query.transferIssueCategory
+          input(type='checkbox' name='transferIssueCategory' value='LOAN_TRANSFER' checked disabled).hidden
+        else
+          input(type='checkbox' name='transferIssueCategory' value='LOAN_TRANSFER' disabled).hidden
+        label 债权
+    .fourteen.wide.field
+      .inline.fields
+        .four.wide.field
+          .ui.checkbox
+            if _query.planIssueCategory
+              input(type='checkbox' name='planIssueCategory' value='F' checked).hidden
+            else
+              input(type='checkbox' name='planIssueCategory' value='F').hidden
+            label 计划
+        .five.wide.field 适用计划期限
+        .nine.wide.field
+          if _query.deadLine && _query.deadLine.length > 0
+            input(type='text' name='deadLine' placeholder='输入期数数字用逗号区分' value=_query.deadLine required)
+          else
+            input(type='text' name='deadLine' placeholder='输入期数数字用逗号区分' value= required)
+        .five.wide.field
+          .ui.checkbox
+            if _query.isAllPlan
+              input(type='checkbox' name='allPlan' value='isAllPlan' checked).hidden
+            else
+              input(type='checkbox' name='allPlan' value='isAllPlan').hidden
+            label 全部计划
+.field.J_fieldset
+  label 参数设置(保留整数)
+  .J_fieldset-holder
+    .J_fieldset-item
+      .inline.fields
+        .field
+          label 折扣金额
+          input(
+            type='text' name='disValue' placeholder='' value=)
+        .field
+          label 最少投资金额
+          input(type='text' name='minInvestAmount' placeholder='' value=)
+        .field
+          a(href='#' title='删除')
+            i.red.delete.icon
+  button.ui.add.button(type='button') 添加
+.field
+  label 发放设置
+  .inline.fields
+    .inline.fields
+    - var captions = [{'type': 'AUTO', 'title': '自动发放'}, {'type': 'MANUAL', 'title': '手动发放'}, {'type': 'SERIAL', 'title': '生成兑换码'}]
+    each item, idx in captions
+      .field
+        .ui.radio.checkbox
+          if _query.issueStrategy === item.type
+            input(type='radio' name='issueStrategy' value= item.type checked).hidden
+          else if idx === 0
+            input(type='radio' name='issueStrategy' value= item.type checked).hidden
+          else if idx === 1
+            input(type='radio' name='issueStrategy' value= item.type ).hidden
+          else
+            input(type='radio' name='issueStrategy' value= item.type).hidden
+          label #{item.title}
+.ui.buttons
+  button.ui.blue.button 创建并发放

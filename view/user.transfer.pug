@@ -1,0 +1,72 @@
+extends layout.pug
+
+block page-val
+  - var pageClass = 'page-user-transfer'
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _isPlatform = (action == 'platform')
+  - var pageTitle = _isPlatform ? '转账' : '转账'
+  - var _id = _.get(_query, 'id')
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if !!(errors)
+    +Error(errors)
+  else
+    .ui.segment
+      table.ui.celled.striped.table
+        tbody
+          tr
+            td.disabled 用户名
+            td #{_entity.userName}
+            td.disabled 姓名
+            td #{_entity.name}
+          tr
+            td.disabled 可用资金
+            td #{UIHelper.formatMoney(_entity.availablePoints)}
+            td.disabled 冻结资金
+            td #{UIHelper.formatMoney(_entity.frozenPoints)}
+  if success
+    +Success(_baseUrl)
+  else if !(entity)
+    | 
+  else
+    form#J_user-transfer-form(method='POST' class='ui green segment form')
+      h4.ui.dividing.header #{pageTitle}
+      if !!(errors)
+        +Error(errors)
+      input(type='hidden' name='_csrf' value=csrf)
+      .field.required
+        label 金额
+        input(
+          type='text' name='amount'
+          value=query.amount
+          placeholder='金额' minlength=1 maxlength=20 required)
+      .field.required
+        label 目标账户
+        .ui.selection.dropdown
+          input(type='hidden' name='target' value=_query.target)
+          i.dropdown.icon
+          .default.text 目标账户
+          .menu 
+            - var _list = [{k: '2', v: '红小宝收入账户'}, {k: '8', v: '红上XX账户(废弃)'}, {k: '9', v: '存管自有子账户'}, {k: '32', v: '平衡金账户'}, {k: '33', v: '至信账户'}, {k: '136679', v: '抵用金子账户'}, {k: '136678', v: '返现账户'}]
+            each item in _list
+              if _id != item.k
+                .item(data-value=item.k) #{item.v} | #{item.k}
+      .field.required
+        label 备注
+        textarea(name='notes' placeholder='备注' minlength=1 maxlength=500 required) #{query.notes}
+      button.ui.positive.submit.button(type='submit') 转账
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_user-transfer-form': !{JSON.stringify(errors)}});

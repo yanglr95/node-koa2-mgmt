@@ -1,0 +1,43 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '登录'
+  - var pageClass = 'page-login'
+  - var _query = query || {}
+
+block body
+  div(class='ui middle aligned center aligned grid')
+    div(class='column')
+      h2(class='ui teal image header')
+        div(class='content') 后台管理系统
+      form#J_login-form(class='ui large form' method='post')
+        input(
+          type='hidden'
+          name='_csrf'
+          value=csrf
+        )
+        div(class='ui stacked segment')
+          div(class='field')
+            div(class='ui left icon input')
+              i(class='user icon')
+              input(
+                type='text' name='username' autocomplete='off'
+                placeholder='用户名' value=_query.username
+              )
+          div(class='field')
+            div(class='ui left icon input')
+              i(class='lock icon')
+              input(
+                type='password' name='password' minlength='6', maxlength='20' autocomplete='off'
+                placeholder='6-20位数字和大小写字母' value=_query.username
+              )
+          button(class='ui fluid large teal submit button'
+            type='submit'
+          ) 登录
+        if !!(errors)
+          +Error(errors)
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_login-form': !{JSON.stringify(errors)}});

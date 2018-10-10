@@ -1,0 +1,45 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = 'app公告管理'
+  - var pageClass = 'page-app-announce-index'
+  - var pageUrl = '/app/announce'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/app') APP
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    .ui.grid
+      .column.right.aligned
+        .ui.compact.menu
+          a.item(href=`${pageUrl}/create`) 
+            i.plus.icon
+            | 添加
+    if dataList && dataList.length
+      table(class='ui celled striped table')
+        thead
+          tr
+            th 标题
+            th ID
+            th 时间
+            th.right.aligned 操作
+        tbody
+          each val,idx in dataList
+            tr
+              td
+                a(href=pageUrl+'/'+val.id rel='nofollow') #{val.title}
+              td
+                if val.id
+                  | #{val.id}
+              td
+                if val.date
+                  | #{UIHelper.formatdate('YYYY-MM-DD', val.date)}
+              td.right.aligned
+                a.ui.icon.tiny.button(href=pageUrl+'/'+val.id title='编辑')
+                  i.edit.icon
+                a.ui.icon.tiny.orange.button.J_confirm.J_delete(data-url=pageUrl+'/remove' data-post=JSON.stringify({id:val.id}) title='删除')
+                  i.close.icon
+    else
+      +Empty()

@@ -1,0 +1,43 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/withdraw/word'
+  - var _baseText = '提现黑名单'
+  - var _typeMap = {'userName':'用户名','mobile':'手机号','cardNo':'银行卡号','idNo':'身份证号'}
+  - var pageTitle = '添加提现黑名单'
+  - var pageClass = 'page-withdraw-word-index'
+  - var pageUrl = '/withdraw/word'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) #{_baseText}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_withdraw-word-create-form(class='ui stacked green segment form' method='POST')
+    input(type='hidden' name='_csrf' value=csrf)
+    .field.required
+      label 类型
+      select(name="blackType")
+        each v,k in _typeMap
+          option(value=k selected=k==_query.blackType) #{v}
+    .field.required
+      label 内容
+      input(type='text' name='blackValue' value=_query.blackValue
+        placeholder='内容' title='内容'
+        required minlength=2 maxlength=20
+      )
+    .ui.center.aligned.basic.segment
+      .ui.buttons
+        button(class='ui positive button' type='submit') 保存
+        .or
+      button(class='ui button' type='reset') 重置
+    if !!(errors)
+      +Error(errors)
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_withdraw-word-create-form': !{JSON.stringify(errors)}});

@@ -1,0 +1,151 @@
+extends layout.pug
+
+block page-val
+  - var _entity = entity || {}
+  - var _query = query || {}
+  - var _extra = _entity['loanExtInfo'] || {}
+  - var pageTitle = '标的信息'
+  - var pageClass = 'page-loan-detail'
+  - var pageUrl = '/loan'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href=pageUrl+'?act='+stepCurrent) 标的管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.steps.top.attached
+    +Step(stepCurrent, stepList)
+  if batchList && batchList.length
+    h3.ui.attached.header 操作
+    form#J_loan-detail-form.ui.attached.segment.form(method='POST')
+      if !!(errors)
+        +Error(errors)
+      input(type='hidden' name='_csrf' value=csrf)
+      table.ui.celled.striped.table
+        tbody
+          tr
+            td.disabled 标的ID
+            td ##{_entity.loanId}
+            td.disabled 进件号
+            td #{_extra.refId}
+          tr
+            td.disabled 借款期限
+            td #{_entity.months}个月
+            td.disabled 合同利率
+            td #{_entity.interest}%
+          tr
+            td.disabled 借款金额
+            td(colspan='3') #{UIHelper.formatMoney(_entity.amount)}
+      .ui.action.input.field
+        select.ui.dropdown(name='action')
+          option(value='') 选择操作
+          each val in batchList
+            option(value=val.k) #{val.v}
+        button.ui.button(type='submit') 应用操作
+    if success
+      +Success().attached
+  h3.ui.attached.header
+    | 标的信息
+  .ui.attached.segment
+    table.ui.celled.striped.table
+      tbody
+        tr
+          td.disabled 借款标题
+          td #{_entity.title}
+          td.disabled 剩余/借款 期限
+          td #{_entity.leftMonths}/#{_entity.months}  个月
+          td.disabled 合同借款金额
+          td #{UIHelper.formatMoney(_entity.amount)}
+        tr
+          td.disabled 合同利率
+          td #{_entity.interest}%
+          td.disabled 标的状态
+          td #{_.get(UIHelper.parseLoanStatus(_entity.status),'name')}
+          td.disabled 放标时间
+          td #{ _entity.passTime?UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _entity.passTime):''}
+        tr
+          td.disabled 月还本息
+          td #{UIHelper.formatMoney(_entity.monthlyRepay)}
+          td.disabled 待还本金
+          td #{UIHelper.formatMoney(_entity.toRepaidPrinciple)}
+          td.disabled 利息
+          td #{UIHelper.formatMoney(_entity.toRepaidInterest)}
+        tr
+          td.disabled 借款描述
+          td #{_entity.description}
+          td.disabled 风险等级
+          td(colspan='3') #{_entity.riskLevel}
+  h3.ui.attached.header 审核信息
+  .ui.attached.segment
+    - var _hasHouse = !!_extra.hasHouse
+    - var _hasHouseLoan = !!_extra.hasHouseLoan
+    - var _hasCar = !!_extra.hasCar
+    - var _hasCarLoan = !!_extra.hasCarLoan
+    table.ui.celled.striped.table
+      tbody
+        tr
+          td.disabled 最高学历
+          td #{_extra.graduation}
+          td.disabled 毕业院校
+          td(colspan='3') #{_extra.university}
+        tr
+          td.disabled 婚姻状况
+          td  #{UIHelper.parseLoanMarriageStatus(_extra.marriageStatus)}
+          td.disabled 有无子女
+          td #{_extra.hasChild?'有':'无'}
+          td.disabled 是否有房
+          td #{_hasHouse?'有':'无'}
+        tr
+          td.disabled 有无房贷
+          td #{_hasHouseLoan?'有':'无'}
+          td.disabled 是否有车
+          td #{_hasCar?'有':'无'}
+          td.disabled 有无车贷
+          td #{_extra.hasCarLoan?'有':(_extra.hasCarLoan==null?'--':'无')}
+        tr
+          td.disabled 籍贯
+          td #{_extra.accountLocation}
+          td.disabled 居住地址
+          td #{_extra.residence}
+          td.disabled 居住电话
+          td #{_extra.residenceTel}
+        tr
+          td.disabled 单位名称
+          td #{_extra.companyName}
+          td.disabled 职业状态
+          td #{_extra.jobStatus}
+          td.disabled 工作城市
+          td #{_extra.companyLocation}
+        tr
+          td.disabled 公司类型
+          td #{_extra.companyCategory}
+          td.disabled 公司行业
+          td #{_extra.companyIndustry}
+          td.disabled 职位
+          td #{_extra.companyPost}
+        tr
+          td.disabled 月收入
+          td #{_extra.monthlyIncome}
+          td.disabled 公司地址
+          td(colspan='3') #{_extra.companyAddress}
+        tr
+          td.disabled 直系联系人
+          td #{_extra.immediateName}
+          td.disabled 关系
+          td #{_extra.immediateRelationShip}
+          td.disabled 手机
+          td #{_extra.immediateTel}
+        tr
+          td.disabled 其他联系人
+          td #{_extra.otherRelationName}
+          td.disabled 关系
+          td #{_extra.otherRelationShip}
+          td.disabled 手机
+          td #{_extra.otherRelationTel}
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_loan-detail-form': !{JSON.stringify(errors)}});

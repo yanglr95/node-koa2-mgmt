@@ -1,0 +1,37 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.userId
+  - var _id = _.get(_query, 'userId')
+  - var _nav = _.get(_query, 'nav')
+  - var _name = {'trade':'交易记录','withdraw':'提现记录'}
+  - var pageTitle = _name[_nav]
+  - var pageClass = 'page-user-fund'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each k in ['trade', 'withdraw']
+      a.item(href=`${_baseUrl}/fund?act=${k}`, class={'active':_nav==k}) #{_name[k]}
+    a.item(href=_baseUrl+'/bankcard') 银行卡管理
+  .ui.bottom.attached.segment
+    form.ui.form(method='POST')
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      if dataList && dataList.length
+        table(class='ui compact striped celled table')
+          if _nav == 'trade'
+            include ./user.fund.table.trade.pug
+          else if _nav == 'withdraw'
+            include ./user.fund.table.withdraw.pug
+      else
+        +Empty()

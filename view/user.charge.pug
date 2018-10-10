@@ -1,0 +1,56 @@
+extends layout.pug
+
+block page-val
+  - var pageClass = 'page-user-charge'
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _isPlatform = (action == 'platform')
+  - var pageTitle = _isPlatform ? '平台特殊账户充值' : '平台转账个人'
+  - var _id = _.get(_query, 'id')
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if !(entity)
+    +Error(errors)
+  else
+    .ui.segment
+      table.ui.celled.striped.table
+        tbody
+          tr
+            td.disabled 用户名
+            td #{_entity.userName}
+            td.disabled 姓名
+            td #{_entity.name}
+  if success
+    +Success(_baseUrl)
+  else if !(entity)
+    | 
+  else
+    form#J_user-charge-form(method='POST' class='ui green segment form')
+      h4.ui.dividing.header #{pageTitle}
+      if !!(errors)
+        +Error(errors)
+      input(type='hidden' name='_csrf' value=csrf)
+      .field.required
+        label 充值金额
+        input(
+          type='text' name='amount'
+          value=query.amount
+          placeholder='充值金额' minlength=1 maxlength=20 required)
+      .field.required
+        label 备注
+        textarea(name='notes' placeholder='备注' minlength=1 maxlength=500 required) #{query.notes}
+      button.ui.positive.submit.button(type='submit') 充值
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_user-charge-form': !{JSON.stringify(errors)}});

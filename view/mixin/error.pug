@@ -1,0 +1,7 @@
+mixin Error(list=[])
+  if list && list.length
+    div(class='ui error message')
+      ul.list
+        each err in errors
+          each v,k in err
+            li #{v}

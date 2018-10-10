@@ -1,0 +1,56 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '首页弹窗'
+  - var pageClass = 'page-app-popups-index'
+  - var pageUrl = '/app/popups'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/app') APP
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    .ui.grid
+      .column.right.aligned
+        .ui.compact.menu
+          a.item(href=`${pageUrl}/create`) 
+            i.plus.icon
+            | 添加
+    if dataList && dataList.length
+      table(class='ui celled striped table')
+        thead
+          tr
+            th 序号
+            th 名称
+            th 图片地址
+            th 链接地址
+            th 有效期
+            th 状态
+            th.right.aligned 操作
+        tbody
+          each val,idx in dataList
+            tr
+              td
+                a(href=pageUrl+'/edit/'+val.id title='编辑') #{idx+1}
+              td
+                a(href=pageUrl+'/detail/'+val.id target='_blank' rel='nofollow' title='查看') #{val.title}
+              td.word_break
+                a(href=val.image target='_blank' rel='nofollow') #{val.image}
+              td.word_break
+                | #{val.url}
+              td
+                if val.start
+                  | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.start)}
+                | -
+                if val.end
+                  | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.end)}
+              td #{val.isEffective}
+              td.right.aligned
+                a.ui.icon.tiny.button(href=pageUrl+'/edit/'+val.id title='编辑')
+                  i.edit.icon
+                a.ui.icon.tiny.orange.button.J_confirm.J_delete(data-url=pageUrl+'/remove' data-post=JSON.stringify({id:val.id}) title='删除')
+                  i.close.icon
+    else
+      +Empty()
+    

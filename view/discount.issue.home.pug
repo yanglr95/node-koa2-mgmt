@@ -1,0 +1,36 @@
+extends layout.pug
+
+block page-val
+  - var _currentNav = stepCurrent
+  - var pageTitle = _currentNav === 'deduction' ? '抵扣券' : '满减券'
+  - var _issueType = issueData.issueStrategy
+  - var _issueList = issueData.couponvalue
+  - var _issueAutoType = issueData.autoType || []
+  - var _query = query || {}
+
+block content
+  - var _url = _currentNav === 'deduction' ? '/discount/deduction' : '/discount/coupon'
+  - var _url_user_tpl = '/upload/static/discount_user_tpl.xlsx'
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href= _url) #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each step in stepList
+      a.item(href=step.url title=step.sub class={active:_currentNav==step.key}) #{step.title}
+  .ui.attached.segment
+    form.ui.form(method='POST')#J_upload
+      h4.ui.dividing.header 发放#{pageTitle}
+      input(type='hidden' name='_csrf' value=csrf)
+      if _currentNav == 'deduction'
+        - var issueType = _issueType
+        include discount.deduction.issue.pug
+      else if _currentNav == 'coupon'
+        - var issueType = _issueType
+        include discount.coupon.issue.pug
+      .ui.basic.segment
+        .ui.buttons
+          button(class='ui positive button' type='submit' name='submit' value=_issueType) 保存 
+block foot-script
+  script.
+    app.handler('discount')({uploadHolder:'#J_filer-uploader',field:'file',act:'discount'});

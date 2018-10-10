@@ -1,0 +1,58 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _id = _.get(_query, 'id')
+  - var _isAvailable = !!_.get(entity, 'mobileAuth')
+  - var _action = action
+  - var pageTitle = _isAvailable ? '解绑手机号' : '绑定手机号'
+
+  - var pageClass = 'page-user-mobile'
+  if _action=='edit'
+    - pageTitle = '修改手机号'
+  else if _action=='unbind'
+    - pageTitle = '解绑手机号'
+    - _isAvailable = true
+  else if _action=='bind'
+    - pageTitle = '绑定手机号'
+    - _isAvailable = false
+
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if success && _action
+    +Success(_baseUrl)
+  else
+    form#J_user-mobile-form(method='POST' class='ui green segment form')
+      h4.ui.dividing.header #{pageTitle}
+      if !!(errors)
+        +Error(errors)
+      input(type='hidden' name='_csrf' value=csrf)
+      if _action=='edit'
+        input(type='hidden' name='action' value='edit')
+      else if _isAvailable
+        input(type='hidden' name='action' value='unbind')
+      else
+        input(type='hidden' name='action' value='bind')
+      .field.required
+        label 手机号
+        input(type='text' name='mobile'
+          value=_query.mobile||_entity.mobile
+          readonly= (_action=='edit') ? false : _isAvailable
+          minlength='11' maxlength='11'
+          placeholder='手机号')
+      button.ui.positive.submit.button(type='submit') #{pageTitle}
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_user-mobile-form': !{JSON.stringify(errors)}});

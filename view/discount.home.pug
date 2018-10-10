@@ -1,0 +1,25 @@
+extends layout.pug
+
+block page-val
+  - var _currentNav = stepCurrent
+  - var _query = query || {}
+  - var pageTitle = _currentNav === 'deduction' ? '优惠券' : '满减券'
+
+block content
+  - var _url = _currentNav === 'deduction' ? '/discount/deduction' : '/discount/coupon'
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href= _url) #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each step in stepList
+      a.item(href=step.url title=step.sub class={active:_currentNav==step.key}) #{step.title}
+  .ui.attached.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      if _currentNav == 'deduction'
+        include discount.deduction.pug
+      else if _currentNav == 'coupon'
+        include discount.coupon.pug

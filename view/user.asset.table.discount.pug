@@ -1,0 +1,68 @@
+thead
+  tr
+    th 优惠券批次ID
+    th 优惠券ID
+    th 运营文案
+    th.right.aligned 兑换码
+    if filter == 1
+      th.right.aligned 最少投资金额
+      th.right.aligned 折扣金额
+    else  
+      th.right.aligned 起投金额
+      th.right.aligned 抵扣率
+      th.center.aligned 最大抵扣金额
+    th.right.aligned 领取时间
+    th.right.aligned 失效时间
+    th.right.aligned 投资金额
+    th.right.aligned
+      if filter == 1
+        | 折扣金额
+      else
+        | 抵扣金额  
+    th.right.aligned 投资产品
+    th.right.aligned 产品ID
+    th.right.aligned 投资时间
+    th.right.aligned 优惠券状态
+    th.right.aligned 使用渠道
+tbody
+  each val,idx in dataList
+    tr
+      td #{val.batchId}
+      td #{val.id}
+      td #{val.tag}
+      td.right.aligned #{val.serial}
+      if filter == 1
+        td.right.aligned #{UIHelper.formatNumber(val.allowDerateInvest, 2)}
+        td.right.aligned #{UIHelper.formatNumber(val.derateAmount, 2)}
+      else
+        td.right.aligned #{UIHelper.formatNumber(val.minInvestAmount, 2)}
+        td.right.aligned #{UIHelper.formatNumber(val.dicountRate, 2)}%
+        td.right.aligned #{UIHelper.formatNumber(val.maxDiscountAmount, 2)}
+      td.right.aligned #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.bindTime)}
+      td.right.aligned #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.expireTime)}
+      td.center.aligned
+        if val.investAmount
+          | #{UIHelper.formatNumber(val.investAmount, 2)}
+      td.right.aligned
+        if val.valueActual
+          | #{UIHelper.formatNumber(val.valueActual, 2)}
+      td.right.aligned
+        if val.businessCategory
+          +DiscountUsed(val.businessCategory)
+      td.right.aligned
+        if val.businessId && val.businessCategory === 'LOAN'
+          a(href='/loan/'+val.businessId) #{val.businessId}
+        else if val.businessId && val.businessCategory === 'LOAN_TRANSFER'
+          a(href='/transfer/'+val.businessId) #{val.businessId}
+        else if val.businessId
+          a(href='/plan/'+val.businessId) #{val.businessId}
+      td.right.aligned
+        if val.consumeTime
+          | #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.consumeTime)}
+      td.right.aligned
+        +DiscountStatus(val.status)
+      td.right.aligned #{val.tradeMethod}
+tfoot
+  tr
+    th(colspan='16')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)

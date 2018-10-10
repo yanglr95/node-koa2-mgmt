@@ -1,0 +1,45 @@
+thead
+  tr
+    th 抵扣券批次ID
+    th 名称
+    th 抵扣率
+    th 最大抵扣金额
+    th.right.aligned 状态
+    th.right.aligned 已领取数量
+    th.center.aligned 已使用数量
+    th.center.aligned 已抵扣金额
+    th.center.aligned 发放类型
+    th.center.aligned 创建时间
+    th
+tbody
+  each val,idx in dataList
+    - var discountVal = JSON.parse(val.valueJson)
+    tr
+      td
+        a(href='/discount/deduction/' + val.id title='发放详情') #{val.id}
+      td
+        a(href='/discount/deduction/' + val.id title='发放详情') #{val.batchName}
+      td
+        each item, index in discountVal
+          span #{item.discountRate}%
+          if index < discountVal.length - 1
+            | ，
+      td #{UIHelper.formatNumber(val.amountCondition, 2)}
+      td
+        +DiscountStatus(val.batchStatus)
+      td #{val.totalCount}
+      td #{val.usedCount}
+      td #{UIHelper.formatNumber(val.valueActual, 2)}
+      td 
+        +DiscountIssueType(val.issueStrategy)
+      td #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.createTime - 0)}
+      td
+        a(href='/discount/deduction/' + val.id title='发放详情')
+          i.black.large.unhide.icon
+        if val.batchStatus === 'ENABLED'
+          a(href='/discount/' + val.id + '/deduction/invalid' title='作废')
+            i.red.large.remove.circle.icon
+tfoot
+  tr
+    th(colspan='13')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)

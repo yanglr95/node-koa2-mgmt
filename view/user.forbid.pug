@@ -1,0 +1,68 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _id = _.get(_query, 'id')
+  - var pageClass = 'page-user-idcard'
+  - var pageTitle = '封禁详情'
+  - var _forbidData = forbidData
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if success
+    .ui.positive.attached.message 操作成功
+  else
+    - var loginForbid = _forbidData ? _forbidData.ANTI_PLUGIN_LOG_IN : false
+    - var rechargeForbid = _forbidData ? _forbidData.ANTI_PLUGIN_CHECK_IN : false
+    - var withdrawForbid = _forbidData ? _forbidData.ANTI_PLUGIN_CASH_DRAW : false
+    - var planForbid = _forbidData ? _forbidData.ANTI_PLUGIN_BUY_FINANCE_PLAN : false
+    - var transferForbid = _forbidData ? _forbidData.ANTI_PLUGIN_BUY_LOAN_TRANSFER : false
+    - var loanForbid = _forbidData ? _forbidData.ANTI_PLUGIN_BUY_LOAN : false
+    form(method='post').ui.segment
+      input(type='hidden' name='_csrf' value=csrf)
+      h4.ui.dividing.header 功能封禁
+      .ui.form
+        fieldset
+          legend 登录
+          .inline.fields.J_forbid-modal
+            +ForbidUpdate(loginForbid, 'login')
+        .ui.hidden.divider
+        fieldset
+          legend 充值
+          .inline.fields.J_forbid-modal
+            +ForbidUpdate(rechargeForbid, 'recharge')
+        .ui.hidden.divider          
+        fieldset
+          legend 提现
+          .inline.fields.J_forbid-modal
+            +ForbidUpdate(withdrawForbid, 'withdraw')
+        .ui.hidden.divider          
+        fieldset
+          legend 投资
+          .inline.fields.J_forbid-modal
+            label(for='loan') 散标投资
+            +ForbidUpdate(loanForbid, 'loan')
+          .inline.fields.J_forbid-modal
+            label(for='plan') 计划投资
+            +ForbidUpdate(planForbid, 'plan')
+          .inline.fields.J_forbid-modal
+            label(for='transfer') 债权投资
+            +ForbidUpdate(transferForbid, 'transfer')
+        .ui.hidden.divider          
+        .field
+          textarea(placeholder='请输入封禁备注', name='content')
+        .ui.hidden.divider   
+      button(type='submit', name='action', value='revise').ui.primary.button 保存
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_user-forbid-form': !{JSON.stringify(errors)}});
+  script.
+    app.handler('userForbid')();

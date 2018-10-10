@@ -1,0 +1,58 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '银行限额'
+  - var pageClass = 'page-charge-bank-limit'
+  - var pageUrl = '/bank'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    h4.ui.dividing.header 银行限额
+    .ui.grid
+      .column.aligned
+        .ui.compact.menu
+          a.item(href=`${pageUrl}/order`) 
+            i.plus.icon
+            | 代扣排序
+        .ui.compact.menu
+          a.item(href=`${pageUrl}/add`) 
+            i.plus.icon
+            | 添加银行
+    if dataList && dataList.length
+      table.ui.called.table
+        thead
+          tr
+            th 银行ID
+            th 银行名称
+            th 代扣支付
+            th 代扣银行代码
+            th 代扣限额
+            th 操作
+        tbody
+          each item, idx in dataList
+            - var _bankId = _.get(item, 'id') || 0
+            - var _bankName = _.get(item, 'bankName') || ''
+            - var _withholdPay = _.get(item, 'quotaStatus') || ''
+            - var _bankCode = _.get(item, 'bankCode') || 0
+            - var _singleLimit = _.get(item, 'perSumQuota') || 0
+            - var _dayLimit = _.get(item, 'perDayQuota') || 0
+            tr
+              td #{_bankId}
+              td #{_bankName}
+              td #{UIHelper.parseBankStatus(_withholdPay)}
+              td #{_bankCode}
+              td
+                if _singleLimit
+                  | 单笔#{_singleLimit} 
+                if _dayLimit
+                  | 单日#{_dayLimit} 
+              td
+                a(href='/bank/list/edit/' + _bankId) 编辑
+        
+
+
+

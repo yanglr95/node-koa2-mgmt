@@ -1,0 +1,81 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '修改返现比例'
+  - var pageClass = 'page-cashback-count'
+  - var _query = query || {}
+  - var _baseUrl = '/cashback/ratio'
+  - var pageUrl = '/cashback'
+  - var _inviteRole = _.get(data, 'inviteRole')
+  - var _chainLevel = _.get(data, 'chainLevel')
+  - var _financePlanPeriod = _.get(data, 'financePlanPeriod')
+  - var _defaultBackRate = _.get(data, 'defaultBackRate')
+  - var _activeBackRate = _.get(data, 'activeBackRate')
+  - var _activeTime = _.get(data, 'activeTime')
+  - var _expireTime = _.get(data, 'expireTime')
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href= pageUrl) 返现记录
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.attached.segment
+    if success
+      +Success(_baseUrl)
+    else
+      form.ui.form(method='POST')
+        input(type='hidden' name='_csrf' value=csrf)
+        table(class='ui compact striped celled table form')
+          thead
+            tr
+              th
+                label 返现类型
+              th.required.field 
+                label 默认返现比例
+              th.required.field 
+                label 活动返现比例
+              th.required.field 
+                label 活动开始时间
+              th.required.field 
+                label 活动结束时间
+          tbody
+            tr
+              td
+                if _inviteRole == 0
+                  | 销售
+                else if _inviteRole == 1
+                  | 员工
+                else if _inviteRole == 2
+                  | 普通用户
+                if _chainLevel == 0
+                  | 自返现
+                else if _inviteRole !== 2 && _chainLevel == 1
+                  | 1级
+                else if _chainLevel == 2
+                  | 2级
+                else if _chainLevel == 3
+                  | 3级
+                if _financePlanPeriod && _chainLevel == 0
+                  | #{_financePlanPeriod}月期
+                else
+                  | 返现
+              td
+                input(type='text' name='defaultBackRate' required placeholder='' value=_defaultBackRate || _query.defaultBackRate)
+              td.required
+                input(type='text' name='activeBackRate' required placeholder='' value=_activeBackRate || _query.activeBackRate)
+              td.required
+                input.datetimepicker.datetimepicker-datetime(
+                  type='text' required name='activeTime' placeholder='活动开始时间'
+                  value=_activeTime? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _activeTime) : _query.activeTime
+                  )
+              td.required
+                input.datetimepicker.datetimepicker-datetime(
+                  type='text' required name='expireTime' placeholder='活动结束时间'
+                  value=_expireTime? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _expireTime) : _query.expireTime
+                  )
+        if !!(errors)
+          +Error(errors)          
+        .ui.buttons
+          button.ui.blue.button 保存

@@ -1,0 +1,24 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _id = _.get(_query, 'inviteId')
+  - var pageTitle = '解除绑定'
+  - var _currentNav = stepCurrent
+  - var _baseUrl = '/user/'+ _id +'/statics'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section #{pageTitle}
+  h3.ui.attached.header #{headerTitle}#{pageTitle}  
+  .ui.attached.segment
+    if success
+      +Success(_baseUrl)
+    else
+      form#J_user-forbid-form(method='POST' class='ui form')
+        +Error(errors)
+        input(type='hidden' name='_csrf' value=csrf)
+        input(type='hidden' name='action' value='unbind')
+        button.ui.positive.submit.button(type='submit') #{pageTitle}

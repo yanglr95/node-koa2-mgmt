@@ -1,0 +1,344 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '用户信息'
+  - var pageClass = 'page-user-detail'
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _entity = entity || {}
+  - var _borrow = borrowSummary || {}
+  - var _lend = lendSummary || {}
+  - var _intention = _.get(_entity, 'intention');
+  - var _isLender = _intention == 'LENDER'
+  - var _isBorrow = _intention == 'BORROWER'
+  - var _isSystem = _intention == 'PLATFORM'
+  - var _isOrganization =  _intention == 'CHANNEL'
+  - var _inviteRole = _.get(_entity, 'inviteRole')
+  - var _isCustomer = _inviteRole == 'CUSTOMER'
+  - var _isEmployee = _inviteRole == 'EMPLOYEE'
+  - var _isSales = _inviteRole == 'SALES'
+  - var _isTrust = !!_.get(_entity, 'isCreateEscrowAcc')
+  - var _isAuth = !!_.get(_entity, 'idCardAuth')
+  - var _isBindCard = !!_.get(_entity, 'bindCard')
+  - var _inviteUserId = _.get(_entity, 'inviteUid')
+  - var _inviteCount = _.get(_entity, 'inviteCount') - 0
+  - var _cashBackAmount = _.get(_entity, 'cashBackAmount') - 0
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  h3.ui.top.attached.header
+    | 基础信息
+    .sub.header
+      if _isLender
+        | 理财用户
+      if _isBorrow
+        | 借款用户
+      if _isOrganization
+        | 机构用户
+      if _isSystem
+        | 系统账户
+      span(title='用户ID') ##{_entity.id}
+      |  / 
+      span(title='用户名') #{_entity.userName}
+      if _entity.fundAcc
+        |  / 
+        span(title='恒丰客户编号') #{_entity.fundAcc}
+  .ui.attached.segment
+    table.ui.celled.striped.table
+      tbody
+        tr
+          td.disabled 用户ID / 用户名
+          td ##{_entity.id} / #{_entity.userName}
+          td.disabled 注册时间
+          td
+            if _entity.regDate
+              | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _entity.regDate - 0)}
+            else
+              |  
+          td.disabled 注册渠道
+          td #{_entity.source}
+        tr
+          td.disabled 真实姓名
+          td #{_entity.realName}
+          td.disabled 身份证
+          td
+            | #{_entity.idNo} 
+            a(href=_baseUrl+'/idcard') #{_entity.idCardAuth ? '解绑' : '绑定'}
+          td.disabled 性别
+          td
+            if _entity.gender=='MALE'
+              | 男
+            else if _entity.gender=='FEMALE'
+              | 女
+            else
+              | 
+        tr
+          td.disabled 年龄
+          td #{_entity.age}
+          td.disabled 手机号
+          td
+            span(data-raw=_entity.mobile)#J_user-mobile #{ _entity.mobile ? UIHelper.safeMobile(_entity.mobile) : ''}
+            |  
+            a#J_user-mobile-trigger(href='###' data-raw='隐藏') 展示
+            |  / 
+            a(href=_baseUrl+'/mobile') #{_entity.mobileAuth ? '解绑' : '绑定'}
+          td.disabled 功能封禁
+          td
+            a(href=_baseUrl+'/forbid') 设置
+        tr
+          td.disabled 公司名称
+          td #{_entity.company}
+          td.disabled 组织机构代码
+          td #{_entity.organizationCode}
+          td.disabled 交易密码
+          td #{_entity.cashPassword && _entity.cashPassword.length ? '已设置' : '未设置'}
+        tr
+          td.disabled 客服工号
+          td
+            | #{_entity.sourceValue} 
+            |  
+            a(href=_baseUrl+'/invite') #{(_entity.sourceValue && _entity.sourceValue.length)?'修改':'添加'}
+          td.disabled 客服姓名
+          td #{_entity.financeManagerName}
+          td.disabled 客服手机
+          td #{_entity.financeManagerMobile}
+        tr
+          td.disabled 风险评测
+          td #{_entity.riskEvaluation ? UIHelper.parseRiskRate(_entity.riskEvaluation) : ''}
+          td.disabled 评测时间
+          td #{_entity.evaluationTime ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _entity.evaluationTime - 0) : ''}
+          td.disabled 存管账户
+          td 
+            if _isTrust
+              | #{_entity.fundAcc}
+            else
+              a(href=_baseUrl+'/openaccount') 开户
+        tr
+          td.disabled 最后登录时间
+          td #{_entity.lastLoginDate ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _entity.lastLoginDate-0):''}
+          td.disabled 最后登录IP
+          td #{_entity.ip}
+          td.disabled utmSource
+          td #{_entity.promotion}
+        tr
+          td.disabled 用户类型
+          td
+            if _isCustomer
+              | 普通用户
+            else if _isEmployee
+              | 员工
+            else if _isSales
+              | 销售
+          td.disabled 邀请人ID
+          td
+            a(href='/user/' + _inviteUserId) #{_inviteUserId}
+          td.disabled
+             |  用户身份 
+          td
+             | #{_entity.newbie ? '新手' : '非新手'}
+  h3.ui.attached.header 资金信息
+  .ui.attached.segment
+    table.ui.celled.striped.table
+      tbody
+        tr
+          td.disabled 账户余额
+          td #{UIHelper.formatMoney(_entity.totalFunds)}
+          td.disabled 可用金额
+          td #{UIHelper.formatMoney(_entity.availableBalance)}
+          td.disabled 冻结金额
+          td #{UIHelper.formatMoney(_entity.freezeBalance)}
+        tr
+          td.disabled 累计充值金额
+          td #{UIHelper.formatMoney(_entity.rechargeAmount)}
+          td.disabled 累计提现金额
+          td(colspan='3') #{UIHelper.formatMoney(_entity.withdrawAmount)}
+    //-
+      - var _isLender = _intention == 'LENDER'
+      - var _isBorrow = _intention == 'BORROWER'
+      - var _isSystem = _intention == 'PLATFORM'
+      - var _isOrganization =  _intention == 'CHANNEL'
+    if _isOrganization || _isSystem
+      //- 存管自有子账户
+      if '9' == _entity.id
+        .ui.stackable.three.item.tabs.menu
+          a.item(href=_baseUrl+'/charge?act=platform') 平台充值
+          a.item(href=_baseUrl+'/withdraw?act=platform') 平台提现
+          a.item(href=_baseUrl+'/transfer') 平台转账
+        .ui.stackable.three.item.tabs.menu
+          a.item(href=_baseUrl+'/fund?act=trade') 交易记录
+          a.item(href=_baseUrl+'/fund?act=withdraw') 提现记录
+          .item
+      else
+        .ui.stackable.three.item.tabs.menu
+          a.item(href=_baseUrl+'/fund?act=trade') 交易记录
+          a.item(href=_baseUrl+'/fund?act=withdraw') 提现记录
+          a.item(href=_baseUrl+'/transfer') 平台转账
+    else 
+      .ui.stackable.three.item.tabs.menu
+        a.item(href=_baseUrl+'/charge') 平台转账个人
+        a.item(href=_baseUrl+'/withdraw') 人工提现
+        a.item(href=_baseUrl+'/withdraw?act=platform') 平台提现
+      .ui.three.item.tabs.menu
+        a.item(href=_baseUrl+'/fund?act=trade') 交易记录
+        a.item(href=_baseUrl+'/fund?act=withdraw') 提现记录
+        a.item(href=_baseUrl+'/bankcard') 银行卡管理
+  if _isLender
+    h3.ui.attached.header 资产统计
+    .ui.attached.segment
+      table.ui.celled.striped.table
+        tbody
+          tr
+            td.disabled 账户总资产
+            td #{UIHelper.formatMoney(_lend.assets)}
+            td.disabled 理财总资产
+            td #{UIHelper.formatMoney(_lend.financeFund)}
+            td.disabled 账户余额
+            td #{UIHelper.formatMoney(_lend.totalFund)}
+          tr
+            td.disabled 累计收益
+            td #{UIHelper.formatMoney(_lend.totalIncome)}
+            td.disabled 昨日收益
+            td #{UIHelper.formatMoney(_lend.yesterdayInterest)}
+            td.disabled 累计投资金额
+            td #{UIHelper.formatMoney(_lend.totalInvest)}
+          tr
+            td.disabled 计划持有资产
+            td #{UIHelper.formatMoney(_lend.planAssets)}
+            td.disabled 计划累计收益
+            td #{UIHelper.formatMoney(_lend.planTotalInterest)}
+            td.disabled 计划昨日收益
+            td #{UIHelper.formatMoney(_lend.yesterdayPlanInterest)}
+          tr
+            td.disabled 计划累计投资金额
+            td #{UIHelper.formatMoney(_lend.planTotalInvest)}
+            td.disabled 收益再投资金额
+            td #{UIHelper.formatMoney(_lend.sumInterestReinvestedAmount)}
+            td.disabled 已提取金额
+            td #{UIHelper.formatMoney(_lend.planWithDrawAmount)}
+          tr
+            td.disabled 债权持有资产
+            td #{UIHelper.formatMoney(_lend.claimsAssets)}
+            td.disabled 债权累计收益
+            td #{UIHelper.formatMoney(_lend.claimsTotalInterest)}
+            td.disabled 债权昨日收益
+            td #{UIHelper.formatMoney(_lend.yesterdayLoanInterest)}
+          tr
+            td.disabled 债权累计投资金额
+            td #{UIHelper.formatMoney(_lend.claimsTotalInvest)}
+            td.disabled 利息收益
+            td #{UIHelper.formatMoney(_lend.claimsInterestIncome)}
+            td.disabled 债权转让盈亏
+            td #{UIHelper.formatMoney(_lend.claimsTransfer)}
+          tr
+            td.disabled 全部待收本息
+            td(colspan='5') #{UIHelper.formatMoney(_lend.principalAndInterest)}
+      .ui.stackable.three.item.tabs.menu
+        a.item(href=_baseUrl+'/asset?act=plan') 计划持有明细
+        a.item(href=_baseUrl+'/asset?act=loan') 债权持有明细
+        a.item(href=_baseUrl+'/asset?act=discount') 优惠券持有明细
+  if _isBorrow
+    h3.ui.attached.header 借款统计
+    .ui.attached.segment
+      table.ui.celled.striped.table
+        tbody
+          tr
+            td.disabled 借款总金额
+            td #{UIHelper.formatMoney(_borrow.totalAmount)}
+            td.disabled 累计支付利息
+            td #{UIHelper.formatMoney(_borrow.totalRepaidInterest)}
+            td.disabled 账户余额
+            td #{UIHelper.formatMoney(_entity.totalFunds)}
+          tr
+            td.disabled 当前待还本息
+            td #{UIHelper.formatMoney(_borrow.totalUnrepaidAmount)}
+            td.disabled 待还本金
+            td #{UIHelper.formatMoney(_borrow.totalUnrepaidPrincipal)}
+            td.disabled 待还利息
+            td #{UIHelper.formatMoney(_borrow.totalUnrepaidInterest)}
+      - var _dataList = borrowList
+      if _dataList && _dataList.length
+        table.ui.celled.striped.table
+          thead
+            tr
+              th 标的ID
+              th 标的
+              th 状态
+              th.right.aligned 借款金额
+              th.right.aligned 利率
+              th.right.aligned 期限
+              th.center.aligned 放标时间
+              th.right.aligned 月还本息
+              th.right.aligned 待还本金
+              th.right.aligned 待还利息
+          tbody
+            each val,idx in _dataList
+              - var _loanStatus = UIHelper.parseLoanStatus(val.status)
+              tr
+                td #{val.loanId}
+                td: a(href='/loan/'+val.loanId target='_blank') #{val.title}
+                td #{_loanStatus && _loanStatus.name}
+                td.right.aligned #{UIHelper.formatMoney(val.amount)}
+                td.right.aligned #{val.interest}%
+                td.right.aligned #{val.months}个月
+                td.center.aligned #{val.passTime ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.passTime): ''}
+                td.right.aligned #{UIHelper.formatMoney(val.monthlyRepay)}
+                td.right.aligned #{UIHelper.formatMoney(val.principalToRepay)}
+                td.right.aligned #{UIHelper.formatMoney(val.interestToRepay)}
+  h3.ui.attached.header 邀请统计
+  .ui.attached.segment
+    table.ui.celled.striped.table
+      tbody
+        tr
+          td.disabled 邀请人数
+          td #{UIHelper.formatNumber(_inviteCount)}
+          td.disabled 返现金额
+          td #{UIHelper.formatMoney(_cashBackAmount)}
+    .ui.stackable.item.tabs.menu
+      a.item(href=_baseUrl+'/statics') 统计明细
+  h3.ui.attached.header 备注信息
+  form#J_user-reply-form.ui.attached.comments.segment.reply.form(method='POST')
+    input(type='hidden' name='_csrf' value=csrf)
+    input(type='hidden' name='action' value='remark')
+    input(type='hidden' name='page' value=1)
+    if dataList && dataList.length
+      table.ui.celled.striped.table
+        thead
+          tr
+            th id
+            th 人员
+            th.center.aligned 时间
+            th 备注
+        tbody
+          each val,idx in dataList
+            tr
+              td #{val.memoId}
+              td #{val.reporter}
+              td.center.aligned
+                if val.createTime
+                  | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.createTime)}
+                else
+                  |  
+              td #{val.memo}
+        tfoot
+          th(colspan='4')
+            +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+    if !!(errors)
+      +Error(errors)
+    .field.required
+      label 备注内容
+      textarea(name='content' placeholder='备注内容最多500字' maxlength=500 required)
+    button.ui.blue.labeled.icon.button(type='submit')
+      i.icon.edit
+      | 添加备注
+
+block foot-script
+  script.
+    app.handler('userDetail')();
+  if !!(errors)
+    script.
+      app.formError({'#J_user-reply-form': !{JSON.stringify(errors)}});

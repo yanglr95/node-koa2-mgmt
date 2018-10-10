@@ -1,0 +1,21 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '支付状态同步'
+  - var pageClass = 'page-sync-count'
+  - var _query = query || {}
+  - var pageUrl = '/charge'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/charge') 充值管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    .ui.icon.message
+      i.refresh.loading.icon
+      .content
+        .header 支付状态同步请求提交成功
+        p 支付状态同步请求提交成功!

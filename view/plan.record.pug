@@ -1,0 +1,46 @@
+extends layout.pug
+
+block page-val
+  - var _query = entity || {}
+  - var _id = _query.id
+  - var pageTitle = '加入详情'
+  - var pageClass = 'page-plan-detail'
+  - var pageUrl = '/plan'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/plan') 计划管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 加入详情
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      if dataList && dataList.length
+        table(class='ui compact striped stackable celled table')
+          thead
+            tr
+              th 序号
+              th 用户ID
+              th 用户名
+              th 真实姓名
+              th 加入金额
+              th 加入时间
+          tbody
+            each val,idx in dataList
+              tr
+                td #{idx+1}
+                td #{val.userId}
+                td #{val.userName}
+                td #{val.realName}
+                td #{UIHelper.formatNumber(val.amount)}
+                td #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.createTime)}
+          tfoot
+            tr
+              th(colspan='6')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      else
+        +Empty()

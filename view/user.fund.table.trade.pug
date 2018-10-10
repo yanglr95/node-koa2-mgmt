@@ -1,0 +1,34 @@
+thead
+  tr
+    th ID
+    th.center.aligned 时间
+    th 记录类型
+    th 详细类型
+    th 转出用户
+    th 转入用户
+    th.right.aligned 金额
+    th.right.aligned 结余
+    th 备注
+    th 相关交易号
+tbody
+  each val,idx in dataList
+    - _pointDisplayType = UIHelper.parseFundDisplayType(val.pointDisplayType)
+    tr
+      td #{val.id}
+      td.center.aligned #{val.date ? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.date) : ''}
+      td #{_pointDisplayType && _pointDisplayType.name}
+      td #{val.pointTypeName}
+      td
+        if val.fromUser
+          a(href='/user/'+val.fromUser target='_blank') #{val.fromUser}
+      td
+        if val.toUser
+          a(href='/user/'+val.toUser target='_blank') #{val.toUser}
+      td.right.aligned #{UIHelper.formatMoney(val.amount)}
+      td.right.aligned  #{UIHelper.formatMoney(val.balance)}
+      td #{val.note}
+      td #{val.txNum}
+tfoot
+  tr
+    th(colspan='10')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)

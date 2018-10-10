@@ -1,0 +1,44 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '代扣排序'
+  - var pageClass = 'bank-list-order'
+  - var pageUrl = '/bank/list'
+  - var _dataList = dataList
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href=`${pageUrl}`) 银行限额
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    if success
+      +Success(`${pageUrl}`)
+    else
+      form#J_bank-order-form.ui.form(method='POST')
+        input(type='hidden', name='_csrf', value=csrf)
+        table.ui.called.table
+          thead
+            tr
+              th 银行ID
+              th 银行名称
+              th 银行代码
+              th 排序
+          tbody
+            if _dataList && dataList.length
+              each item, idx in dataList
+                - var _bankId = _.get(item, 'id') || 0
+                - var _bankName = _.get(item, 'bankName') ||''
+                - var _bankCode = _.get(item, 'bankCode') || 0
+                - var _bankOrder = _.get(item ,'weight') || 0
+                tr.J_bank-item
+                  td #{_bankId}
+                    input.J_bank-id(type='hidden', name='bankid', value=_bankId)
+                  td #{_bankName}
+                  td #{_bankCode}
+                  td
+                    .ui.input
+                      input.J_bank-order(type="number", name='bankorder', value=_bankOrder)
+        button.J_form-submit-btn.ui.green.button(type='submit') 保存

@@ -1,0 +1,70 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/withdraw'
+  - var _typeMap = {'userName':'用户名','mobile':'手机号','cardNo':'银行卡号','idNo':'身份证号'}
+  - var pageTitle = '提现黑名单'
+  - var pageClass = 'page-withdraw-word-index'
+  - var pageUrl = '/withdraw/word'
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form.ui.segment.form(method='POST')
+    .ui.grid
+      .left.floated.column
+        .ui.action.input.field
+          input(type='text' name='searchVal' maxlength='20'
+            placeholder='搜索关键字' value=_query.searchVal)
+          .ui.selection.dropdown
+            input(type='hidden' name='searchName' value=_query.searchName)
+            i.dropdown.icon
+            .default.text 搜索字段
+            .menu
+              each v,k in _typeMap
+                .item(data-value=k) #{v}
+          button.ui.attached.primary.button(type='submit') 搜索
+      .four.wide.column
+        .ui.right.aligned.floated.compact.menu
+          a.item(href=`${pageUrl}/create`) 
+            i.plus.icon
+            | 添加
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    if batch && batchResult
+      +BatchMessage(batchResult)
+    if dataList && dataList.length
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th 
+            th 类型
+            th 信息
+        tbody
+          each val in dataList
+            tr
+              td.collapsing
+                .ui.fitted.checkbox.J_item-checkbox
+                  input(type='checkbox' name='ids' value=`${val.blackType}_${val.blackValue}` data-extra={id:val.id})
+                  label
+              td #{_typeMap[val.blackType]||'unknow'}
+              td #{val.blackValue}
+        tfoot
+          tr
+            th
+              //- 有批量操作
+              if batchList && batchList.length
+                .ui.fitted.checkbox.J_toggle-checkbox-button
+                  input(type='checkbox' title='全选/反选')
+                  label
+            th(colspan='2')
+              +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+              //- 有批量操作
+              if batchList && batchList.length
+                +Batch(batchList)
+    else
+      +Empty()

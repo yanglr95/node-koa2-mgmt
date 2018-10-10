@@ -1,0 +1,61 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _id = _.get(_query, 'id')
+  - var _isAvailable = !!_.get(entity, 'idCardAuth')
+  - var _isTrust = !!_.get(_entity, 'isCreateEscrowAcc')
+  - var _isAuth = !!_.get(_entity, 'idCardAuth')
+  - var _isBindCard = !!_.get(_entity, 'bindCard')
+  - var _action = action
+  - var pageTitle = '存管开户'
+  - var pageClass = 'page-user-open-account'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  if success && _action
+    +Success(_baseUrl)
+  else if !(entity)
+    +Error(errors)
+  else if _isTrust
+    div(class='ui warning message')
+      p 已开户
+  else
+    form#J_user-open-account-form(method='POST' class='ui green segment form')
+      h4.ui.dividing.header #{pageTitle}
+      if !!(errors)
+        +Error(errors)
+      input(type='hidden' name='_csrf' value=csrf)
+      .field.required
+        label 真实姓名
+        input(
+          type='text' name='name' maxlength='10'
+          value= _query.name||_entity.realName
+          placeholder='真实姓名' readonly=_isAuth required)
+      .field.required
+        label 身份证号
+        input(
+          type='text' name='idNo' minlength='18' maxlength='18'
+          value= _query.idNo||_entity.idNo
+          placeholder='身份证号' readonly=_isAuth required)
+      .field
+        label 手机号
+        input(
+          type='text' name='mobile'
+          value=_entity.mobile
+          placeholder='手机号' readonly disabled)
+      button.ui.positive.button(type='submit') #{pageTitle}
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_user-open-account-form': !{JSON.stringify(errors)}});

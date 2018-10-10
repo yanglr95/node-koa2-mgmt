@@ -1,0 +1,8 @@
+mixin DiscountIssueType(type)
+  - var _type = type || 'AUTO'
+  if _type === 'AUTO'
+    | 自动发放
+  else if _type === 'MANUAL'
+    | 手动发放
+  else if _type === 'SERIAL'
+    | 兑换码发放

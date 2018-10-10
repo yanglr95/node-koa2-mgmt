@@ -1,0 +1,60 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '历史记录'
+  - var pageClass = 'page-repayment-history'
+  - var pageUrl = '/repayment/history'
+  - var _query = query || {}
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/repayment') 还款管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form.ui.segment.form(method='POST')
+    h4.ui.dividing.header 搜索条件
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    .fields
+      .five.wide.field
+        label 还款日期
+        .two.fields
+          .field
+            input.datetimepicker.datetimepicker-date(
+              type='text' name='startDate' maxlength='10'
+              placeholder='下限' value=_query.startDate)
+          .field
+            input.datetimepicker.datetimepicker-date(
+              type='text' name='endDate' maxlength='10'
+              placeholder='上限' value=_query.endDate)
+    button.ui.primary.button(type='submit') 搜索
+    if dataList && dataList.length
+      h4.ui.dividing.header 搜索结果
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th.center.aligned 名称
+            th.center.aligned 还款日期
+            th.right.aligned 正常还款笔数
+            th.right.aligned 正常还款金额
+            th.right.aligned 提前还款笔数
+            th.right.aligned 提前结清金额
+            th.right.aligned 操作
+        tbody
+          each val,idx in dataList
+            tr
+              td.center.aligned
+                a(href='/repayment/history/'+val.dueDate) #{val.name}
+              td.right.aligned #{val.dueDate}
+              td.right.aligned #{val.commonRepayCount}
+              td.right.aligned #{UIHelper.formatMoney(val.commonRepayAmount)}
+              td.right.aligned #{val.inRepayCount}
+              td.right.aligned #{UIHelper.formatMoney(val.inRepayAmount)}
+              td.right.aligned
+                a(href='/repayment/history/'+val.dueDate + '/download' title='导出Excel')
+                  i.download.icon
+    else
+      +Empty()

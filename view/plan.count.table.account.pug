@@ -1,0 +1,11 @@
+thead.right.aligned 
+  tr
+    th.center.aligned 产品期限
+    th 账户可用金额
+    th 账户数量
+tbody.right.aligned 
+  each val,idx in dataList
+    tr
+      td.center.aligned #{val.lock_period}
+      td #{val.balance}
+      td #{val.user_count}

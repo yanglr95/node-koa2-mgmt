@@ -1,0 +1,115 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '批次管理'
+  - var pageClass = 'page-withdraw-batch'
+  - var pageUrl = '/withdraw/batch'
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/withdraw'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/withdraw') 提现管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+        if lastDate
+          .ui.right.floated.sub.header
+            | 上个批次更新时间: #{lastDate}
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      - var _statusList = [{k:'PROCESS',v:'处理中'}, {k:'FINISH',v:'受理完成'}, {k:'FAIL',v:'批次失败'}]
+      .fields
+        .six.wide.field
+          label 系统提交时间
+          .two.fields
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='beginTime' maxlength='10'
+                placeholder='下限' value=_query.beginTime)
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='endTime' maxlength='10'
+                placeholder='上限' value=_query.endTime)
+        .five.wide.field
+          label 状态
+          .ui.selection.dropdown
+            input(type='hidden' name='cashDrawStatus' value=_query.cashDrawStatus)
+            i.dropdown.icon
+            .default.text 全部状态
+            .menu
+              .item(data-value='') 全部状态
+              each item in _statusList
+                .item(data-value=item.k) #{item.v}
+      button.ui.primary.button(type='submit') 搜索
+      if dataList && dataList.length
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th 批次ID
+              th.right.aligned 提现金额
+              th.center.aligned 提交笔数
+              th.right.aligned 成功金额
+              th.center.aligned 成功笔数
+              th.right.aligned 失败金额
+              th.center.aligned 失败笔数
+              th.right.aligned 退款金额
+              th.center.aligned 退款笔数
+              th.center.aligned 批次状态
+              th.center.aligned 系统提交时间
+              th.center.aligned 受理完成时间
+              th.right.aligned 操作
+          tbody
+            each val,idx in dataList
+              tr
+                td
+                  a(href=pageUrl+'/'+val.batchNo) #{val.batchNo}
+                td.right.aligned #{UIHelper.formatMoney(val.totalAmount)}
+                td.center.aligned #{val.totalCount}
+                td.right.aligned #{UIHelper.formatMoney(val.totalSuccAmount)}
+                td.center.aligned #{val.totalSuccCount}
+                td.right.aligned #{UIHelper.formatMoney(val.totalFailAmount)}
+                td.center.aligned #{val.totalFailCount}
+                td.right.aligned #{UIHelper.formatMoney(val.totalBackAmount)}
+                td.center.aligned #{val.totalBackCount}
+                td.center.aligned #{val.viewStatus}
+                td.center.aligned
+                  if val.batchTime
+                    | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.batchTime)}
+                  else
+                    | 
+                td.center.aligned
+                  if val.finishDate
+                    | #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.finishDate)}
+                  else
+                    | 
+                td.right.aligned
+                  a.ui.icon.tiny.button.J_update(href='###'
+                      data-url='/withdraw/update/'+val.batchNo
+                      data-post=JSON.stringify({act:'update'}) title='更新批次及明细状态')
+                    i.browser.icon
+                  a.ui.icon.tiny.button.J_update(href='###'
+                      data-url='/withdraw/update/'+val.batchNo
+                      data-post=JSON.stringify({act:'refund'}) title='更新退票单据')
+                    i.refresh.icon
+                  //-
+                    a.ui.icon.orange.tiny.button.J_confirm.J_delete(href='###'
+                        data-url='/withdraw/update/'+val.batchNo
+                        data-post=JSON.stringify({act:'remove'}) title='退回')
+                      i.close.icon
+          tfoot
+            tr
+              th(colspan='13')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+                //- 有批量操作
+                if batchList && batchList.length
+                  +Batch(batchList)
+
+      else
+        +Empty()

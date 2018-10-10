@@ -1,0 +1,45 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '渠道管理'
+  - var pageClass = 'page-channel-index'
+  - var pageUrl = '/channel'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  form#J_product-query-form(class='ui segment form' method='POST')
+    .ui.right.aligned.grid
+      .column
+        .ui.right.floated.compact.menu
+          a.item(href='/product') 产品管理
+          a.item(href=`${pageUrl}/create`) 
+            i.plus.icon
+            | 添加
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    if dataList && dataList.length
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th ID
+            th 渠道名称
+            th 渠道标识
+            th 渠道状态
+            th 更新时间
+            th.right.aligned 操作
+          tbody
+           each val,idx in dataList
+            tr
+              td #{val.id}
+              td #{val.utmsourceName}
+              td #{val.utmsource}
+              td #{val.status ? '已启用' : '已禁用'}
+              td #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.updateTime)}
+              td.right.aligned
+                a(href=`${pageUrl}/${val.id}`) 修改
+    else
+      +Empty()

@@ -1,0 +1,65 @@
+mixin Pagination(current, totalCount)
+  - totalCount = parseInt(totalCount) || 0
+  - current = parseInt(current) || 1
+  - var page = current
+  - var pageSize = attributes.pageSize && parseInt(attributes.pageSize, 10) || 10
+  - var pageTotal = Math.floor((totalCount + pageSize - 1) / pageSize)
+  - var pageDisplay = 5
+  - var pageMin = 1
+  - var pageMax = 1
+  - var list = [20,50,100,500,1000]
+  .J_pagination(class='ui mini menu' class!=attributes.class)
+    .item 共#{totalCount}条, #{page}/#{pageTotal}页
+    .ui.item.compact.dropdown
+      input(type='hidden' name='pagesize' value=pageSize)
+      .default.text 每页#{pagesize}条
+      .menu
+        each item in list
+          .item(data-value=item) 每页#{item}条
+    - pageMax = page
+    a(class='icon item' class={'disabled': !pageTotal} title='首页' data-page=1)
+      i.left.angle.double.icon
+    if page > 1
+      a(class='icon item' title='上一页' data-page=page-1)
+        i.left.angle.icon
+    else
+      a(class='icon disabled item' title='上一页')
+        i.left.angle.icon
+    if pageTotal < pageDisplay
+      - pageMin = 1
+    else if page < (pageDisplay/2+1)
+      - pageMin = 1
+    else if ( pageTotal - page ) < (pageDisplay / 2)
+      - pageMin = pageTotal - pageDisplay + 1
+    else
+      - pageMin = page - Math.floor(pageDisplay / 2)
+
+    if pageTotal
+      each x,idx in _.range(pageMin, pageMax)
+        a(class='item' title=x data-page=x) #{x}
+
+    a(class='active item' title=page) #{page}
+
+    - pageMin = page + 1
+    if pageTotal < pageDisplay
+      - pageMax = pageTotal + 1
+    else
+      if (pageTotal - page) < (pageDisplay/2)
+        - pageMax = pageTotal + 1
+      else if page < (pageDisplay/2 + 1)
+        - pageMax = pageDisplay + 1
+      else
+        - pageMax = page + Math.round(pageDisplay/2)
+
+    if pageTotal
+      each x,idx in _.range(pageMin, pageMax)
+        a(class='item' title=x data-page=x) #{x}
+
+    if page < pageTotal && pageTotal > pageDisplay
+      a(class='icon item' title='下一页' data-page=page+1)
+        i.right.angle.icon
+    else
+      a(class='icon disabled item' title='下一页')
+        i.right.angle.icon
+    a(class='icon item' class={'disabled': !pageTotal} title='尾页' data-page=pageTotal)
+      i.right.angle.double.icon

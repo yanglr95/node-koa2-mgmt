@@ -1,0 +1,89 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '返现比例'
+  - var pageClass = 'page-cashback-count'
+  - var _query = query || {}
+  - var pageUrl = '/cashback'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href= pageUrl) 好友邀请
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.attached.segment
+    form.ui.form(method='POST')
+    input(type='hidden' name='_csrf' value=csrf)
+    input(type='hidden' name='page' value=1)
+    table(class='ui compact striped celled table')
+      thead
+        tr
+          th 返现类型
+          th 默认返现比例
+          th 活动返现比例
+          th 活动时间
+          th 操作
+      tbody
+        each val,idx in ret
+          tr
+            td
+              if val.inviteRole == 0
+                | 销售
+              else if val.inviteRole == 1
+                | 员工
+              else if val.inviteRole == 2
+                | 普通用户
+              if val.chainLevel == 0
+                | 自返现
+              else if val.inviteRole !== 2 && val.chainLevel == 1
+                | 1级
+              else if val.chainLevel == 2
+                | 2级
+              else if val.chainLevel == 3
+                | 3级
+              if val.financePlanPeriod && val.chainLevel == 0
+                | #{val.financePlanPeriod}月期
+              else
+                | 返现
+            td #{UIHelper.formatNumber(val.defaultBackRate, 2)}%
+            td #{UIHelper.formatNumber(val.activeBackRate, 2)}%
+            td #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.activeTime)} - #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.expireTime)}
+            td
+              a(href='/cashback/' + val.id + '/edit') 编辑
+    if logList && logList.length
+      h4.ui.header 修改记录
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th 修改人
+            th 修改内容
+            th 修改时间
+        tbody
+          each val,idx in logList
+            tr
+              td #{val.updateUser}
+              td
+                if val.inviteRole == 0
+                  | 销售
+                else if val.inviteRole == 1
+                  | 员工
+                else if val.inviteRole == 2
+                  | 普通用户返现，
+                if val.chainLevel == 0
+                  | 自返现
+                else if val.chainLevel == 1
+                  | 1级返现，
+                else if val.chainLevel == 2
+                  | 2级返现，
+                else if val.chainLevel == 3
+                  | 3级返现，
+                | #{val.content}
+              td #{UIHelper.formatdate('YYYY-MM-DD HH:mm', val.updateTime)}
+        tfoot
+          tr
+            th(colspan='3')
+              +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+    else
+        +Empty()

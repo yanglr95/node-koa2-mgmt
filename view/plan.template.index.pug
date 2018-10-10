@@ -1,0 +1,66 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '计划模板管理'
+  - var pageClass = 'page-plan-template-index'
+  - var pageUrl = '/plan/template'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/plan') 计划管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    .ui.grid
+      .column.right.aligned
+        .ui.compact.menu
+          a.item(href=`${pageUrl}/create`) 
+            i.plus.icon
+            | 添加
+    if dataList && dataList.length
+      table(class='ui compact striped celled table')
+        thead
+          tr
+            th 名称
+            th 计划名称
+            th.right.aligned 收益率
+            th.center.aligned 加入限额
+            th.right.aligned 追加金额倍数
+            th.right.aligned 申请天数
+            th.right.aligned 产品期限
+            th.right.aligned 投标利率
+            th.right.aligned 投标期限
+            th.right.aligned 最小投资
+            th.right.aligned 最少投资金额
+            th.right.aligned 单笔上限
+            th.right.aligned 提前多久
+            th.right.aligned 提前退出费率
+            th.right.aligned 操作
+        tbody
+          each val,idx in dataList
+            tr
+              td
+                a(href='/plan/template/'+val.id) #{val.title}
+              td
+                a(href='/plan/template/'+val.id) #{val.name}
+              td.right.aligned #{val.expectedRateUplan}%
+              td.center.aligned #{UIHelper.formatNumber(val.minRegisterAmount)} - #{UIHelper.formatNumber(val.singleMaxRegisterAmount)}
+              td.right.aligned #{val.appendMultipleAmount}
+              td.right.aligned #{val.salePeriod}天
+              td.right.aligned #{val.lockPeriod}#{val.dateType=='DAY'? '天': '月'}
+              td.right.aligned #{val.loanLowestRate}-#{val.loanHighestRate} %
+              td.right.aligned #{val.loanLowestPeriod}-#{val.loanHightestPeriod} 个月
+              td.right.aligned #{val.minInvestRate}%
+              td.right.aligned #{UIHelper.formatNumber(val.minInvestAmount)}元
+              td.right.aligned #{val.maxInvestRate}%
+              td.right.aligned #{val.beginDisplayTimeInterval}小时
+              td.right.aligned #{val.quitRateAdvance}%
+              td.right.aligned
+                a.ui.icon.tiny.button(href='/plan/template/'+val.id  title='编辑')
+                  i.edit.icon
+                a.ui.icon.tiny.blue.button(href='/plan/create/'+val.id  title='以此模板发布新计划')
+                  i.plus.icon
+    else
+      +Empty()

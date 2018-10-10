@@ -1,0 +1,115 @@
+.field.required
+  label 抵扣券名称
+  input(
+    type='text' name='batchName' placeholder='' required value=_query.batchName)
+.three.fields
+  .field
+    label 抵扣券文案(最长只能设置6个字文案)
+    input(type='text' name='tag' maxlength='6' placeholder='' value=_query.tag)
+  .field
+    label 最少投资金额(保留两位小数)
+    input(type='text' name='minInvestAmount' placeholder='' value=_query.minInvestAmount)
+  .field.required
+    label 最大抵扣金额(保留两位小数)
+    input(type='text' name='maxDiscountAmount' required placeholder='' value=_query.maxDiscountAmount)
+.grouped.fields.required
+  label(for="validity") 有效期
+  .field(style='padding: 30px 0;')
+    .ui.grid
+      .two.wide.colunm
+        .ui.radio.checkbox
+          if _query.valTime && _query.valTime == 'expireTime'
+            input(type='radio' name='validity' value='expireTime' tabindex='0' checked).hidden
+          else
+            input(type='radio' name='validity' value='expireTime' tabindex='0' checked).hidden  
+          label
+      .fourteen.wide.colunm
+        .inline.fields
+          .six.wide.field
+            input.datetimepicker.datetimepicker-date(
+              type='text' name='expireTime' maxlength='10'
+              placeholder='选择失效时间' value=_query.expireTime)
+          .ten.wide.field 选择此项时，默认发布即生效
+  .field
+    .ui.grid
+      .two.wide.colunm
+        .ui.radio.checkbox
+          if _query.valTime && _query.valTime == 'fixPeriod'
+            input(type='radio' name='validity' value='fixPeriod' tabindex='0' checked).hidden
+          else
+            input(type='radio' name='validity' value='fixPeriod' tabindex='0').hidden  
+          label
+      .fourteen.wide.colunm
+        .inline.fields
+          .three.wide.field
+            input(type='text' name='fixPeriod' placeholder='' value=_query.fixPeriod)
+          .three.wide.field
+            select.ui.fluid.search.dropdown(name='fixPeriodType')
+              option(value='D') 天
+              option(value='M') 月
+              option(value='Y') 年
+          .ten.wide.field 选择此项时，按用户领到优惠券的时间开始生效
+.field
+  label 适用产品
+  .inline.fields
+    .one.wide.field
+      .ui.checkbox
+        if _query.loanIssueCategory
+          input(type='checkbox' name='loanIssueCategory' value='LOAN' checked disabled).hidden
+        else
+          input(type='checkbox' name='loanIssueCategory' value='LOAN' disabled).hidden  
+        label 散标
+    .one.wide.field
+      .ui.checkbox
+        if _query.transferIssueCategory
+          input(type='checkbox' name='transferIssueCategory' value='LOAN_TRANSFER' checked disabled).hidden
+        else
+          input(type='checkbox' name='transferIssueCategory' value='LOAN_TRANSFER' disabled).hidden  
+        label 债权
+    .fourteen.wide.field
+      .inline.fields
+        .four.wide.field
+          .ui.checkbox
+            if _query.planIssueCategory
+              input(type='checkbox' name='planIssueCategory' value='F' checked).hidden
+            else
+              input(type='checkbox' name='planIssueCategory' value='F').hidden
+            label 计划
+        .five.wide.field 适用计划期限
+        .nine.wide.field
+          if _query.deadLine && _query.deadLine.length > 0
+            input(type='text' name='deadLine' placeholder='输入期数数字用逗号区分' value=_query.deadLine required)
+          else
+            input(type='text' name='deadLine' placeholder='输入期数数字用逗号区分' value= required)
+        .five.wide.field
+          .ui.checkbox
+            if _query.isAllPlan
+              input(type='checkbox' name='allPlan' value='isAllPlan' checked).hidden
+            else
+              input(type='checkbox' name='allPlan' value='isAllPlan').hidden
+            label 全部计划    
+.field
+  label 参数设置(请以英文逗号相隔)
+  .six.wide.field
+    .field.ui.labeled.input
+      .ui.label 抵扣率
+      input(type='text' name='discountRate' placeholder='' value=_query.discountRate )
+      .ui.basic.label %
+.field.required
+  label 发放设置
+  .inline.fields
+    - var captions = [{'type': 'AUTO', 'title': '自动发放'}, {'type': 'MANUAL', 'title': '手动发放'}, {'type': 'SERIAL', 'title': '生成兑换码'}]
+    each item, idx in captions
+      .field
+        .ui.radio.checkbox
+          if _query.issueStrategy === item.type
+            input(type='radio' name='issueStrategy' value= item.type checked).hidden
+          else if idx === 0
+            input(type='radio' name='issueStrategy' value= item.type checked).hidden  
+          else if idx === 1
+            input(type='radio' name='issueStrategy' value= item.type ).hidden
+          else  
+            input(type='radio' name='issueStrategy' value= item.type).hidden
+          label #{item.title}
+.ui.buttons
+  button.ui.blue.button(submit='issue') 创建并发放

@@ -1,0 +1,150 @@
+doctype html
+html(lang="zh-cn")
+  head
+    include mixin/index.pug
+    block page-val
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible' content='IE=edge,chrome=1')
+    meta(name='csrf-param' content='_csrf')
+    meta(name='csrf-token' content=csrf)
+    meta(
+      name='viewport'
+      content='width=device-width, initial-scale=1.0, maximum-scale=1.0'
+    )
+    title
+      block title
+        | #{pageTitle||'title'} - #{site_title}
+    link(
+      rel='stylesheet'
+      type='text/css'
+      href='/semantic/dist/semantic.min.css'
+    )
+    link(
+      rel='stylesheet'
+      type='text/css'
+      href= UIHelper.static_url('/dist/app.css')
+    )
+    script(src='/lib/jquery-3.2.0.min.js')
+    script(src='/semantic/dist/semantic.min.js')
+    block head-style
+    block head-script
+  body(class=bodyClass class=pageClass)
+    block body
+      #layout
+        #header.ui.fixed
+          .ui.fluid.menu.large.inverted
+            a.item.logo(href='/') mgmt
+            a.item(href='/')
+              i.home.icon
+              | 首页
+            a.item(href='/loan')
+              i.square.icon
+              | 标的
+            a.item(href='/plan')
+              i.grid.layout.icon
+              | 计划
+            a.item(href='/repayment')
+              i.dollar.icon
+              | 还款
+            a.item(href='/charge')
+              i.yen.icon
+              | 充值
+            a.item(href='/withdraw')
+              i.credit.card.alternative.icon
+              | 提现
+            a.item(href='/user')
+              i.user.icon
+              | 用户
+            .right.menu
+              .item #{user.name}
+              a.ui.item(href='/logout')
+                i.power.icon
+                | 退出
+        #menu
+          .ui.vertical.fluid.menu
+            .item
+              i.home.icon
+              | 首页
+              .menu
+                a.item(href='/banner') banner管理
+                a.item(href='/announce') 公告管理
+            .item
+              i.tablet.icon
+              | APP
+              .menu
+                a.item(href='/app/banner') banner管理
+                a.item(href='/app/announce') 公告管理
+                a.item(href='/app/featured') 首页推荐
+                a.item(href='/app/splash?act=android') Android闪屏管理
+                a.item(href='/app/splash?act=iphone') iPhone闪屏管理
+                a.item(href='/app/splash?act=iphoneX') iPhone x闪屏管理
+                a.item(href='/app/popups') 首页弹窗
+                a.item(href='/app/raise') 加息活动
+            .item
+              i.square.icon
+              | 标的
+              .menu
+                a.item(href='/loan?act=new') 新申请
+                a.item(href='/loan?act=wait') 等待招标
+                a.item(href='/loan?act=bidding') 招标中
+                a.item(href='/loan?act=full') 满标放款
+                a.item(href='/loan?act=repayment') 还款中
+                a.item(href='/loan?act=done') 结清
+                a.item(href='/transfer') 债权转让
+                a.item(href='/product') 产品管理
+            .item
+              i.grid.layout.icon
+              | 计划
+              .menu
+                a.item(href='/plan') 计划管理
+                a.item(href='/plan/batch') 参数管理
+                a.item(href='/plan/template') 模板管理
+                a.item(href='/plan/setting') 后台参数
+                a.item(href='/plan/count') 计划统计
+            .item
+              i.dollar.icon
+              | 还款
+              .menu
+                a.item(href='/repayment') 还款管理
+                a.item(href='/repayment/batch') 批次管理
+                a.item(href='/repayment/history') 历史记录
+            .item
+              i.yen.icon
+              | 充值管理
+              .menu
+                a.item(href='/charge') 充值管理
+                a.item(href='/charge/count') 充值统计
+                a.item(href='/bank/list') 银行限额
+            .item
+              i.credit.card.alternative.icon
+              | 提现管理
+              .menu
+                a.item(href='/withdraw') 提现管理
+                a.item(href='/withdraw/count') 提现统计
+                a.item(href='/withdraw/batch') 批次管理
+                a.item(href='/withdraw/word') 提现黑名单
+            .item
+              i.user.icon
+              | 用户
+              .menu
+                a.item(href='/user') 用户管理
+                a.item(href='/user/forbid') 封禁列表
+                a.item(href='/smscode') 验证码查询
+            a.item(href='/cashback') 
+              i.pie.chart.icon
+              | 好友邀请 
+            a.item(href='/discount/deduction') 
+              i.money.icon
+              | 优惠券
+            a.item(href='/voucher/grant') 
+              i.credit.card.icon
+              | 卡券管理
+        #main
+          block header
+          block content
+          block footer
+    script(src= UIHelper.static_url('/dist/app.js'))
+    if debug
+      script.
+        var datalist = !{JSON.stringify(dataList||'')};
+    block foot-script

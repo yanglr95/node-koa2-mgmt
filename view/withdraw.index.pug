@@ -1,0 +1,134 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '提现管理'
+  - var pageClass = 'page-withdraw-index'
+  - var _currentNav = stepCurrent
+  - var _query = query || {}
+  - var pageUrl = '/withdraw'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each step in stepList
+      a.item(href=step.url title=step.sub class={active:stepCurrent==step.key}) #{step.title}
+  form.ui.attached.segment.form(method='POST')
+    h4.ui.dividing.header
+      | 搜索条件
+      if lastDate
+        .ui.right.floated.sub.header
+          if _currentNav == 'wait'
+            | 上个批次提交时间:
+          else if _currentNav == 'process'
+            | 上次更新状态时间:
+          else if _currentNav == 'refund'
+            | 退票单据获取时间:
+          else
+            | 最后操作时间: 
+          |  #{lastDate}
+    input(type='hidden' name='action' value='query')
+    input(type='hidden' name='page' value=1)
+    input(type='hidden' name='_csrf' value=csrf)
+    if _currentNav == 'refund'
+      a.J_update(class='ui right floated circular icon button'
+          data-url='/withdraw/update'
+          data-post=JSON.stringify({act:'sync'})
+          type='button' title='更新退票单据')
+        i.icon.send
+    - var _statusList = [{k:'CHECK_ERROR',v:'未通过'},{k:'NEW_APPLY',v:'新申请'}]
+    - var _sourceList = [{k:'WEB_DRAWCASH',v:'网站提现'},{k:'AUTO_DRAWCASH',v:'渠道放款提现'},{k:'MANUAL_DRAWCASH',v:'人工提现'}]
+    - var _showTime = false
+    - var _showStatus = true
+    - var _showSource = true
+    if _currentNav == 'wait'
+      - _showStatus = false
+    else if _currentNav == 'process'
+      - _statusList = [{k:'INPROCESS',v:'处理中'}]
+    else if _currentNav == 'refund'
+      - _showStatus = false
+    else if _currentNav == 'done'
+      - _showTime = true
+      - _statusList = [{k:'REJECTED',v:'已驳回'},{k:'CASHDRAW_SUCCESS',v:'提现成功'},{k:'CASHDRAW_FAILED',v:'提现失败'},{k:'REFUND_RECHARGED',v:'退票已充值'}]
+      - _sourceList = [{k:'WEB_DRAWCASH',v:'网站提现'},{k:'AUTO_DRAWCASH',v:'渠道放款提现'},{k:'MANUAL_DRAWCASH',v:'人工提现'},{k:'SPECIAL_DRAWCASH',v:'特殊提现'}]
+    else if _currentNav == 'fail'
+      - _showSource = false
+      - _statusList = [{k:'REJECTED',v:'已驳回'},{k:'CASHDRAW_FAILED',v:'提现失败'},{k:'REFUND_RECHARGED',v:'退票已充值'}]
+    else if _currentNav == 'special'
+      - _showTime = true
+      - _showStatus = false
+      - _showSource = false
+    .fields
+      if _showTime
+        .six.wide.field
+          label 申请日期
+          .two.fields
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='beginTime' maxlength='10'
+                placeholder='下限' value=_query.beginTime)
+            .field
+              input.datetimepicker.datetimepicker-date(
+                type='text' name='endTime' maxlength='10'
+                placeholder='上限' value=_query.endTime)
+      if _showStatus
+        .four.wide.field
+          label 状态
+          .ui.selection.dropdown
+            input(type='hidden' name='cashDrawStatus' value=_query.cashDrawStatus)
+            i.dropdown.icon
+            .default.text 全部状态
+            .menu
+              .item(data-value='') 全部状态
+              each item in _statusList
+                .item(data-value=item.k) #{item.v}
+      if _showSource
+        .four.wide.field
+          label 来源
+          .ui.selection.dropdown
+            input(type='hidden' name='drawCashType' value=_query.drawCashType)
+            i.dropdown.icon
+            .default.text 全部来源
+            .menu
+              .item(data-value='') 全部来源
+              each item in _sourceList
+                .item(data-value=item.k) #{item.v}
+    .ui.action.input.four.wide.field
+      input(type='text' name='searchVal' maxlength='20'
+        placeholder='搜索关键字' value=_query.searchVal)
+      .ui.selection.dropdown
+        input(type='hidden' name='searchName' value=_query.searchName)
+        i.dropdown.icon
+        .default.text 搜索字段
+        .menu
+          - var _list = [{k:'userId',v:'用户ID'},{k:'username',v:'用户名'},{k:'realName',v:'真实姓名'},{k:'mobile',v:'手机号'}]
+          each item in _list
+            .item(data-value=item.k) #{item.v}
+      button.ui.attached.primary.button(type='submit') 搜索
+      //- refund:退票 done:已完成 fail:渠道提现失败
+      if dataList && dataList.length && (_currentNav === 'refund' || _currentNav === 'done' || _currentNav === 'fail')
+        button.ui.button(type='submit' name='excel' value='excel') 导出
+    if batch && batchResult
+      +BatchMessage(batchResult)
+    if dataList && dataList.length
+      table(class='ui compact striped celled table')
+        if _currentNav == 'new'
+          include ./withdraw.index.table.new.pug
+        else if _currentNav == 'wait'
+          include ./withdraw.index.table.wait.pug
+        else if _currentNav == 'process'
+          include ./withdraw.index.table.process.pug
+        else if _currentNav == 'refund'
+          include ./withdraw.index.table.refund.pug
+        else if _currentNav == 'done'
+          include ./withdraw.index.table.done.pug
+        else if _currentNav == 'fail'
+          include ./withdraw.index.table.fail.pug
+        else if _currentNav == 'special'
+          include ./withdraw.index.table.special.pug
+        else
+          include ./withdraw.index.table.process.pug
+    else
+      +Empty()

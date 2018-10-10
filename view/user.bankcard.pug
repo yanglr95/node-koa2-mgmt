@@ -1,0 +1,80 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '银行卡管理'
+  - var pageClass = 'page-user-bankcard'
+  - var _query = query || {}
+  - var _entity = entity || {}
+  - var _baseUrl = '/user/' + _query.id
+  - var _id = _.get(_query, 'id')
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.top.attached.tabular.menu
+    a.item(href=`${_baseUrl}/fund?act=trade`) 交易记录
+    a.item(href=`${_baseUrl}/fund?act=withdraw`) 提现记录
+    a.item.active(href=_baseUrl+'/bankcard') 银行卡管理
+  .ui.bottom.attached.segment
+    if success
+      +Success(_baseUrl).attached
+    else
+      form#J_user-bankcard-form.ui.form(method='POST')
+        if !!(errors)
+          +Error(errors)
+        h4.ui.dividing.header 绑定银行卡
+        input(type='hidden' name='_csrf' value=csrf)
+        input(type='hidden' name='action' value='bind')
+        .field
+          label 真实姓名
+          input(type='text' name='realName' value=_entity.realName placeholder='真实姓名' disabled)
+        .field.required
+          label 开户行
+          select(name='bankCode')
+            each val in UIHelper.bank
+              option(value=val.id selected=val.id==_query.bankCode) #{val.name}
+        .field.required
+          label 银行卡号
+          input(type='text' name='bankNo' value=_query.bankNo  placeholder='银行卡号' minlength=14  maxlength=20 required)
+        .field.required
+          label 预留手机号
+          input(type='text' name='preMobile' value=_query.preMobile  placeholder='预留手机号' minlength=11  maxlength=11 required)
+        button.ui.green.button(type='submit') 保存
+    if dataList && dataList.length
+      h4.ui.dividing.header 银行卡列表
+      table.ui.compact.celled.striped.table
+        thead
+          tr
+            th 银行名称
+            th 银行卡号
+            th 预留手机号
+            th 状态
+            th 操作时间
+            th.collapsing.right.aligned 操作
+        tbody
+          each val,idx in dataList
+            - var _isUsing = (val.status == 'USING')
+            tr
+              td #{val.bankType}
+              td #{val.cardId}
+              td #{val.mobile}
+              td #{_isUsing ? '使用中' : '已解绑'}
+              td #{val.createTime? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.createTime - 0):''}
+              td.right.aligned
+                if _isUsing
+                  a.ui.icon.orange.tiny.button.J_confirm.J_delete(href='###'
+                      data-url= `${_baseUrl}/update`
+                      data-post=JSON.stringify({act:'unbindBankCard', id:val.userBankId})
+                      title='解绑银行卡')
+                    i.close.icon
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_user-bankcard-form': !{JSON.stringify(errors)}});

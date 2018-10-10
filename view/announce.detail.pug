@@ -1,0 +1,46 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '公告管理'
+  - var pageClass = 'page-announce-detail'
+  - var pageUrl = '/announce'
+
+block content
+  - var _query = query || {}
+  - var _action = _query.id ? '编辑':'添加'
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href=pageUrl) #{pageTitle}
+    i.right.angle.icon.divider
+    .active.section #{_action}
+  form#J_announce-form(class='ui stacked green segment form' method='POST')
+    .field.required
+      label 标题
+      input(type='text' name='title' value=_query.title placeholder='名称'  title='名称')
+    .field.required
+      label 日期
+      input.datetimepicker.datetimepicker-date(
+        type='text' name='date' placeholder='日期'  title='日期'
+        value=_query.date? UIHelper.formatdate('YYYY-MM-DD', _query.date) : ''
+        )
+    .field.required
+      label 内容
+      textarea(name='content' placeholder='内容' title='内容') #{_query.content}
+    input(
+      type='hidden'
+      name='_csrf'
+      value=csrf
+    )
+    .ui.center.aligned.basic.segment
+      .ui.buttons
+        button(class='ui positive button' type='submit') 保存
+        .or
+        button(class='ui button' type='reset') 重置
+    if !!(errors)
+      +Error(errors)
+
+block foot-script
+  if !!(errors)
+    script.
+      app.formError({'#J_announce-form': !{JSON.stringify(errors)}});

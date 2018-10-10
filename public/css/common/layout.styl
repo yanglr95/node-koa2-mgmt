@@ -1,0 +1,30 @@
+/**
+ * layout
+ */
+$menu-width = 230px
+
+#header
+  position: relative
+  z-index: 10
+  .logo
+    float: left
+    width: $menu-width
+    text-align: center
+
+#menu
+  position: absolute
+  top: 0
+  left: 0
+  bottom: 0
+  width: $menu-width
+  min-height: 100%
+  padding-top: 40px
+
+#main
+  position: relative
+  margin-left: $menu-width
+  padding: 1rem
+  clearfix()
+
+.word_break
+  word-break: break-all

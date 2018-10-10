@@ -1,0 +1,33 @@
+thead
+  tr
+    th 标的ID
+    th 标的
+    th 状态
+    th.right.aligned 投资金额
+    th.right.aligned 利率
+    th.right.aligned 期限
+    th.center.aligned 放标日期
+    th.right.aligned 剩余期限
+    th.right.aligned 月收本息
+    th.right.aligned 待收本金
+    th.right.aligned 待收利息
+tbody
+  each val,idx in dataList
+    - var _loanStatus = UIHelper.parseLoanStatus(val.status)
+    tr
+      td #{val.loanId}
+      td
+        a(href='/loan/' +val.loanId) #{val.title}
+      td #{_loanStatus && _loanStatus.name}
+      td.right.aligned #{UIHelper.formatMoney(val.amount)}
+      td.right.aligned #{val.interest}%
+      td.right.aligned #{val.months}个月
+      td.right.aligned #{UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', val.passTime)}
+      td.right.aligned #{val.leftMonths}个月
+      td.right.aligned #{UIHelper.formatMoney(val.monthlyRepay)}
+      td.right.aligned #{UIHelper.formatMoney(val.principalToRepay)}
+      td.right.aligned #{UIHelper.formatMoney(val.interestToRepay)}
+tfoot
+  tr
+    th(colspan='11')
+      +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)

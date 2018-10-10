@@ -1,0 +1,70 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '封禁列表'
+  
+block content
+  - var _query = query || {}
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .fields.inline
+        .field
+          .ui.input
+            input(type='text', name='searchId', placeholder='按用户ID搜索', value=_query.userId)
+        .field 
+          .ui.selection.dropdown.attached
+            input(type='hidden', name='searchName', value=_query.actionNameCode)
+            i.dropdown.icon
+            .default.text 搜索功能
+            .menu
+              - var _list = [{k:'OR',v:'无'},{k:'ALL',v:'全部功能'},{k:'ANTI_PLUGIN_LOG_IN',v:'登录'},{k:'ANTI_PLUGIN_CHECK_IN',v:'充值'},{k:'ANTI_PLUGIN_CASH_DRAW',v:'提现'}, {k:'ANTI_PLUGIN_BUY_LOAN',v:'散标投资'},{k:'ANTI_PLUGIN_BUY_FINANCE_PLAN',v:'计划投资'},{k:'ANTI_PLUGIN_BUY_LOAN_TRANSFER',v:'债权投资'}]
+              each item in _list
+                .item(data-value=item.k) #{item.v}
+        .field
+          button.ui.attached.primary.button(type='submit') 搜索
+          
+      if dataList && dataList.length
+        table(class='ui compact striped stackable celled table')
+          thead
+            tr
+              th.center.aligned 序号
+              th.center.aligned 用户ID
+              th.center.aligned 登录
+              th.center.aligned 充值
+              th.center.aligned 提现
+              th.center.aligned 散标投资
+              th.center.aligned 债权投资
+              th.center.aligned 计划投资
+              th 
+              th.center.aligned 操作
+          tbody
+            each val,idx in dataList
+              tr
+                td.center.aligned #{val.id}
+                td.center.aligned 
+                  a(href='/user/'+val.userId) #{val.userId}
+                td.center.aligned #{val.logIn?'已禁用':'已启用'}
+                td.center.aligned #{val.checkIn?'已禁用':'已启用'}
+                td.center.aligned #{val.cashDraw?'已禁用':'已启用'}
+                td.center.aligned #{val.loan?'已禁用':'已启用'}
+                td.center.aligned #{val.loanTransfer?'已禁用':'已启用'}
+                td.center.aligned #{val.financePlan?'已禁用':'已启用'}   
+                td.center.aligned
+                  a(href='/user/'+val.userId+'/forbid') 查看详情 
+                td.center.aligned
+                  a(href='/user/forbid/'+val.userId+'/start') 全部启用
+          tfoot
+            tr
+              th(colspan='11')
+                +Pagination(pageNumber, totalCount)(class='right floated' pageSize=pageSize)
+      else
+        include mixin/empty.pug        

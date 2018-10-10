@@ -1,0 +1,141 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '首页弹窗'
+  - var pageClass = 'page-app-popups-index'
+  - var pageUrl = '/app/popups'
+  - var _query = query || {}
+  - var _pageOperate = pageOperate =='detail'
+  - var _operate = operate
+  - var _action = _query.id ? _operate : '添加'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/app') APP
+    i.right.angle.icon.divider
+    a.section(href=pageUrl) #{pageTitle}
+    i.right.angle.icon.divider
+    .active.section #{_action}
+  form#J_popups-form(class='ui stacked green segment form' method='POST')
+    .field.required
+      label 弹窗名称
+      input(type='text' name='title' value=_query.title placeholder='弹窗名称' disabled = _pageOperate)
+    .field.required
+      label 图片地址
+      input(type='text' name='image' value=_query.image placeholder='图片地址' disabled = _pageOperate)
+      #J_popups-uploader.dropzone
+    .fields
+      .six.wide.field
+        label 链接地址
+        input(type='text' name='url' value=_query.url  placeholder='链接地址' disabled = _pageOperate)
+      .four.wide.field
+        label 地址类型
+        select.ui.dropdown(name='type' disabled = _pageOperate)
+          option(value="")  请选择链接地址类型
+          option(value="h5" selected=_query.type && _query.type === 'h5' ) h5链接
+          option(value="native" selected=_query.type && _query.type === 'native' ) 原生页面
+          option(value="broswer" selected=_query.type && _query.type === 'broswer') 外部浏览器
+    .fields
+      .six.wide.field
+        label 有效期
+        .two.fields
+          .field
+            input.datetimepicker.datetimepicker-datetime(
+              type='text' name='start' placeholder='生效起始日期'
+              value=_query.start? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.start) : ''
+              disabled = _pageOperate
+              )
+          .field
+            input.datetimepicker.datetimepicker-datetime(
+              type='text' name='end' placeholder='生效截至日期'
+              value=_query.end? UIHelper.formatdate('YYYY-MM-DD HH:mm:ss', _query.end) : ''
+              disabled = _pageOperate
+              )
+    .fields
+      .eight.wide.field
+        label 展示频率
+        .two.fields
+          .inline.field
+            input(type='radio' id='everytime' name='frequency' tabindex='0' value='everytime'
+              checked= _query.frequency && _query.frequency === 'everytime' disabled = _pageOperate)
+            label(for='everytime') 每次启动展示 
+          .inline.field
+            input(type='radio' id='once' name='frequency' tabindex='1' value='once'
+              checked=_query.frequency && _query.frequency === 'once' disabled = _pageOperate)
+            label(for='once') 有效期内只展示一次
+    input(type='hidden' name='_csrf' value=csrf)
+    .ui.center.aligned.basic.segment
+      if !_pageOperate
+        .ui.buttons
+          button(class='ui positive button' type='submit') 保存
+          .or
+          button(class='ui button' type='reset') 重置
+    .fields
+      .ui.aligned.grid
+        .column
+          h3 原生路径说明：
+    .fields
+      table(class='ui celled striped table')
+        thead
+          tr
+            th 原生页面
+            th 路径示例
+            th 参数
+        tbody
+          tr
+            td 注册页面
+            td /account/register
+            td
+          tr
+            td 充值页面
+            td /cash/recharge
+            td  
+          tr
+            td 存管开户页面
+            td /home/EscrowActivity
+            td
+          tr
+            td 某个计划的详情页
+            td /plan/detail?productId=0
+            td productId，0替换位对应计划ID
+          tr
+            td 某个散标的详情页
+            td /loan/detail?productId=0
+            td productId，0替换位对应计划ID
+          tr
+            td 登录页面
+            td /account/login
+            td
+          tr
+            td 主页
+            td /home/home_fragment
+            td
+          tr
+            td 红利计划列表页
+            td /home/plan_fragment
+            td
+          tr
+            td 散标列表页
+            td /home/loan_fragment
+            td
+          tr
+            td 债转列表页
+            td /home/loan_transfer_fragment
+            td
+          tr
+            td 账户页
+            td /home/user_fragment
+            td
+          tr
+            td 公告列表
+            td /home/notice
+            td                  
+    if !!(errors)
+      +Error(errors)
+
+block foot-script
+  script.
+    app.handler('upload')({uploadHolder:'#J_popups-uploader',field:'image',act:'popups'});
+  if !!(errors)
+    script.
+      app.formError({'#J_popups-form': !{JSON.stringify(errors)}});

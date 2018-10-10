@@ -1,0 +1,63 @@
+extends layout.pug
+
+block page-val
+  - var _query = query || {}
+  - var _baseUrl = '/user/' + _query.userId
+  - var _id = _.get(_query, 'userId')
+  - var _nav = _.get(_query, 'nav')
+  - var _name = {'plan':'计划持有明细','loan':'债权持有明细', 'discount':'优惠券持有明细'}
+  - var pageTitle = _name[_nav]
+  - var pageClass = 'page-user-asset'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/user') 用户管理
+    i.right.angle.icon.divider
+    a.section(href=_baseUrl) 用户#{_id}
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.top.attached.tabular.menu
+    each k in ['plan', 'loan', 'discount']
+      a.item(href=`${_baseUrl}/asset?act=${k}`
+        title=_name[k]
+        class={'active':_nav==k}
+        ) #{_name[k]}
+  .ui.bottom.attached.segment
+    //- 计划导航
+    if 'plan' == _nav
+      .ui.compact.menu
+        each k,v in ['收益中','退出中','已退出']
+          a.item(href=`?act=${_nav}&filter=${v}`
+            title=k
+            class={'active':v==filter}
+          ) #{k}
+    else if 'discount' == _nav
+      .ui.compact.menu
+        each k,v in ['抵扣券', '满减券']
+          a.item(href=`?act=${_nav}&filter=${v}`
+            title=k
+            class={'active': v==filter}
+          ) #{k}          
+    form.ui.form(method='POST')
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      if dataList && dataList.length
+        table(class='ui compact striped celled table')
+          if _nav == 'plan'
+            if 0 == filter
+              include ./user.asset.table.progress.plan.pug
+            else if 1 == filter
+              include ./user.asset.table.exiting.plan.pug
+            else if 2 == filter
+              include ./user.asset.table.exited.plan.pug
+            else
+              include ./user.asset.table.plan.pug
+          else if _nav == 'loan'
+            include ./user.asset.table.loan.pug
+          else if _nav == 'discount'
+            include ./user.asset.table.discount.pug  
+      else
+        +Empty()

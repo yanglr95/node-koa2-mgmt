@@ -1,0 +1,59 @@
+extends layout.pug
+
+block page-val
+  - var pageTitle = '充值统计'
+  - var pageClass = 'page-charge-count'
+  - var _query = query || {}
+  - var pageUrl = '/charge'
+
+block content
+  .ui.breadcrumb
+    a.section(href='/') 首页
+    i.right.angle.icon.divider
+    a.section(href='/charge') 充值管理
+    i.right.angle.icon.divider
+    .section.active #{pageTitle}
+  .ui.segment
+    form.ui.form(method='POST')
+      h4.ui.dividing.header 搜索条件
+      input(type='hidden' name='action' value='query')
+      input(type='hidden' name='page' value=1)
+      input(type='hidden' name='_csrf' value=csrf)
+      .inline.fields
+        .field
+          label 充值时间
+          input(type='text'
+              class='datetimepicker datetimepicker-date'
+              value= _query.beginDate
+              name='beginDate' maxlength='10' placeholder='开始时间')
+        .field
+          input(type='text'
+            class='datetimepicker datetimepicker-date'
+            value= _query.endDate
+            name='endDate' maxlength='10' placeholder='结束时间')
+        .field
+          button.ui.primary.button(type='submit') 搜索
+      if dataList && dataList.length
+        h4.ui.dividing.header 搜索结果
+        table(class='ui compact striped celled table')
+          thead
+            tr
+              th 充值银行
+              th.right.aligned 网易代扣
+              th.right.aligned 宝付网关
+              th.right.aligned 宝付快捷
+              th.right.aligned PC
+              th.right.aligned android
+              th.right.aligned iOS
+          tbody
+            each val,idx in dataList
+              tr
+                td #{val.bankName}
+                td.right.aligned #{UIHelper.formatMoney(val.withholdAmount)}
+                td.right.aligned #{UIHelper.formatMoney(val.bfGateAmount )}
+                td.right.aligned #{UIHelper.formatMoney(val.bfQuickAmount )}
+                td.right.aligned #{UIHelper.formatMoney(val.pcAmount)}
+                td.right.aligned #{UIHelper.formatMoney(val.androidAmount)}
+                td.right.aligned #{UIHelper.formatMoney(val.iosAmount)}
+      else
+        +Empty()
